@@ -2,21 +2,19 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8"/>
-<title>PAC · Lumio Health · BC3</title>
+<title>PAC · Lumio Health · BC01 REDA</title>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<meta name="description" content="PAC — Parcours d'Activation des Compétences · Éminéo · MSMC RNCP 38504 · BC3 Pilotage Campagne"/>
 <meta name="robots" content="noindex, nofollow"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,300..700;1,300..700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<!-- Favicon Lumio — carré vert -->
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%231a6641'/><circle cx='16' cy='13' r='5' fill='none' stroke='white' stroke-width='1.5'/><path d='M11 24c0-3 10-3 10 0' stroke='white' stroke-width='1.5' fill='none' stroke-linecap='round'/></svg>"/>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230a7a6e'/><path d='M8 20 L16 10 L24 20' stroke='white' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/><circle cx='16' cy='23' r='2' fill='white'/></svg>"/>
 <style>
 :root {
   --font-display: 'Newsreader', Georgia, serif;
   --font-sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', 'SF Mono', Menlo, monospace;
   --bg: #f4f2ee; --ink: #141824; --ink-soft: #2a3142; --ink-mute: #5b6473; --ink-faint: #9aa0ae;
-  --rule: rgba(20,24,36,0.10); --accent: #c4420f;
+  --rule: rgba(20,24,36,0.10); --accent: #0a7a6e;
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
@@ -26,100 +24,94 @@ button { font-family: inherit; } input, textarea { font-family: inherit; }
 *::-webkit-scrollbar-track { background: transparent; }
 *::-webkit-scrollbar-thumb { background: rgba(20,24,36,0.18); border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
 *::-webkit-scrollbar-thumb:hover { background: rgba(20,24,36,0.32); background-clip: padding-box; border: 2px solid transparent; }
-table { border-collapse: collapse; }
-@keyframes fadeIn    { from { opacity: 0; } to { opacity: 1; } }
-@keyframes fadeOutLogin { 0% { opacity: 1; } 100% { opacity: 0; pointer-events: none; } }
-@keyframes typedot   { 0%,60%,100% { opacity: .2; } 30% { opacity: 1; } }
-@keyframes spin      { to { transform: rotate(360deg); } }
+@keyframes fadeIn    { from{opacity:0} to{opacity:1} }
+@keyframes typedot   { 0%,60%,100%{opacity:.2} 30%{opacity:1} }
+@keyframes spin      { to{transform:rotate(360deg)} }
+@keyframes bounce    { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
 @keyframes shake     { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)} }
-@keyframes slideInNotif { from { opacity:0; transform:translateY(-10px) scale(.96); } to { opacity:1; transform:none; } }
-@keyframes dock-bounce {
-  0%,100%{transform:translateY(0) scale(1)} 20%{transform:translateY(-18px) scale(1.1)}
-  40%{transform:translateY(-4px) scale(1.02)} 60%{transform:translateY(-10px) scale(1.06)}
-  80%{transform:translateY(-2px) scale(1.01)}
-}
-.dock-bounce { animation: dock-bounce 0.9s ease 3; }
-/* Placeholder adaptatif — blanc sur fonds sombres, gris sur fonds clairs */
-.placeholder-light::placeholder { color: rgba(20,24,36,0.35) !important; }
-.placeholder-dark::placeholder  { color: rgba(255,255,255,0.40) !important; }
-
-/* Bannière erreur API — apparaît si /api/chat répond mal */
-#lumio-api-error {
-  display: none;
-  position: fixed; top: 0; left: 0; right: 0; z-index: 99999;
-  background: #c4420f; color: white;
-  padding: 8px 20px; font-size: 12px; font-family: var(--font-mono);
-  text-align: center; letter-spacing: 0.04em;
-}
+@keyframes slideInNotif { from{opacity:0;transform:translateY(-10px) scale(.96)} to{opacity:1;transform:none} }
+.placeholder-dark::placeholder { color:rgba(255,255,255,0.40) !important; }
+#lumio-api-error { display:none; position:fixed; top:0; left:0; right:0; z-index:99999; background:#c4420f; color:white; padding:8px 20px; font-size:12px; font-family:var(--font-mono); text-align:center; }
+#loading-screen { position:fixed; inset:0; background:#0B2B2D; display:flex; align-items:center; justify-content:center; z-index:99998; }
+#loading-screen span { font-family:'IBM Plex Mono',monospace; font-size:12px; color:rgba(255,255,255,0.3); letter-spacing:0.15em; }
 </style>
 </head>
 <body>
-<!-- Bannière erreur API (masquée par défaut) -->
+
 <div id="lumio-api-error">
-  ⚠ Jefferson indisponible — Vérifiez la connexion ou contactez le support Éminéo
-  <button onclick="document.getElementById('lumio-api-error').style.display='none'"
-    style="margin-left:16px;background:rgba(255,255,255,0.25);border:none;color:white;padding:2px 10px;border-radius:4px;cursor:pointer;font-family:inherit;font-size:11px">✕</button>
+  ⚠ Connexion IA indisponible
+  <button onclick="document.getElementById('lumio-api-error').style.display='none'" style="margin-left:16px;background:rgba(255,255,255,0.25);border:none;color:white;padding:2px 10px;border-radius:4px;cursor:pointer;font-size:11px">✕</button>
 </div>
 
+<div id="loading-screen"><span>CHARGEMENT…</span></div>
 <div id="root"></div>
 
+<!-- React + Babel -->
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin></script>
+
+<!-- Données -->
 <script src="data.js"></script>
 
 <script>
-/* ── Proxy API — toutes les requêtes Anthropic passent par /api/chat ── */
-(function() {
-  const _fetch = window.fetch.bind(window);
-  window.fetch = function(url, opts = {}) {
-    if (typeof url === 'string' && url.includes('api.anthropic.com')) {
-      return _fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: opts.body,
-      }).then(function(res) {
-        // Afficher la bannière erreur si l'API répond mal
-        if (!res.ok && res.status !== 200) {
-          document.getElementById('lumio-api-error').style.display = 'block';
-        }
-        return res;
-      }).catch(function(err) {
-        document.getElementById('lumio-api-error').style.display = 'block';
-        throw err;
-      });
+/* Proxy API */
+(function(){
+  const _f = window.fetch.bind(window);
+  window.fetch = function(url, opts={}) {
+    if (typeof url==='string' && url.includes('api.anthropic.com')) {
+      return _f('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:opts.body})
+        .then(r=>{ if(!r.ok) document.getElementById('lumio-api-error').style.display='block'; return r; })
+        .catch(e=>{ document.getElementById('lumio-api-error').style.display='block'; throw e; });
     }
-    return _fetch(url, opts);
+    return _f(url,opts);
   };
 })();
 
-/* ── Export log formateur ── */
-window.LUMIO_EXPORT_LOG = function() {
-  const log = window.LUMIO_LOG || {};
-  log.studentName  = window.LUMIO_DATA?.student?.name;
-  log.exportedAt   = new Date().toISOString();
-  log.elapsedMin   = window.LUMIO_TIMER_START
-    ? Math.floor((Date.now() - window.LUMIO_TIMER_START) / 60000) : 0;
-  const blob = new Blob([JSON.stringify(log, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'lumio_log_' + (log.studentName || 'etudiant').replace(/\s+/g, '_') + '.json';
-  a.click();
-};
+/* Chargement séquentiel des JSX — garantit l'ordre d'exécution */
+window.LUMIO_APPS = {};
+
+const JSX_FILES = [
+  'icons.jsx',
+  'app-mail.jsx',
+  'app-browser.jsx',
+  'app-pdf.jsx',
+  'app-voice.jsx',
+  'app-notes.jsx',
+  'app-slack.jsx',
+  'app-extras.jsx',
+  'app-livrable.jsx',
+  'app-assistant.jsx',
+  'app-portfolio.jsx',
+  'desktop.jsx',
+  'main.jsx'
+];
+
+async function loadSequential(files) {
+  for (const file of files) {
+    await new Promise((resolve, reject) => {
+      fetch(file)
+        .then(r => r.text())
+        .then(src => {
+          try {
+            const compiled = Babel.transform(src, { presets: ['react'] }).code;
+            const fn = new Function('React','ReactDOM', compiled);
+            fn(React, ReactDOM);
+            resolve();
+          } catch(e) {
+            console.error('Babel error in', file, e);
+            resolve(); // continuer même si un fichier échoue
+          }
+        })
+        .catch(e => { console.error('Fetch error', file, e); resolve(); });
+    });
+  }
+  // Tout chargé — cacher le loading screen
+  document.getElementById('loading-screen').style.display = 'none';
+}
+
+loadSequential(JSX_FILES);
 </script>
 
-<script type="text/babel" src="icons.jsx"></script>
-<script type="text/babel" src="app-mail.jsx"></script>
-<script type="text/babel" src="app-browser.jsx"></script>
-<script type="text/babel" src="app-pdf.jsx"></script>
-<script type="text/babel" src="app-voice.jsx"></script>
-<script type="text/babel" src="app-notes.jsx"></script>
-<script type="text/babel" src="app-slack.jsx"></script>
-<script type="text/babel" src="app-extras.jsx"></script>
-<script type="text/babel" src="app-livrable.jsx"></script>
-<script type="text/babel" src="app-assistant.jsx"></script>
-<script type="text/babel" src="app-trash.jsx"></script>
-<script type="text/babel" src="desktop.jsx"></script>
-<script type="text/babel" src="main.jsx"></script>
 </body>
 </html>
