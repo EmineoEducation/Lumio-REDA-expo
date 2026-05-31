@@ -1,0 +1,220 @@
+{
+  "meta": {
+    "titre_rncp": "Responsable du développement des affaires",
+    "bloc": "BC01",
+    "intitule_bloc": "CONCEVOIR LE PLAN D'ACTION COMMERCIALE DU PERIMETRE EN RESPONSABILITE",
+    "epreuve": "Mise en situation professionnelle reconstituée scénarisée - Epreuve individuelle à l'écrit",
+    "duree_reelle_min": 210,
+    "note_reflexive": false
+  },
+  "moment_narratif": {
+    "date_fictive": "Lundi 9 septembre 2024",
+    "titre_affaire": "Opération Northgate : conquérir les grands comptes de santé au travail avant la saison Q4",
+    "situation": "Lumio Health vient de finaliser la V2 de son wearable anti-stress AURA destiné aux entreprises. Sonia Ferracci, Directrice Marketing, lance en urgence un comité de pilotage après la réception d'un signal fort : Jakob Rein, DRH du groupe Northgate (4 200 salariés, 12 sites en Europe), a demandé une proposition commerciale complète sous 3 semaines. Théo Marczak (CEO) impose d'aligner cette proposition sur la feuille de route RSE 2025 de Lumio et d'intégrer les nouvelles capacités IA du parcours client. Camille Ott (responsable BtoB) dispose de données terrain contradictoires : le marché santé-travail est porteur (+18 % sur 2 ans) mais deux concurrents viennent de baisser leurs prix de 15 %. Yassine Morel doit synchroniser la production de contenus avec le PAC sans budget supplémentaire.",
+    "enjeu_central": "Construire un Plan d'Action Commerciale structuré pour le périmètre grands comptes BtoB de Lumio Health, en s'appuyant sur un diagnostic interne/externe rigoureux, une stratégie ciblée et un parcours client accessible et RSE-compatible, pour décrocher Northgate et sécuriser le pipeline Q4."
+  },
+  "commanditaire": {
+    "nom": "Sonia Ferracci",
+    "role": "Directrice Marketing, Lumio Health"
+  },
+  "competences": [
+    {
+      "code": "1.1.1",
+      "label": "Développer un dispositif de veille basé sur un process structuré et des sources d'information cohérentes avec les objectifs visés, en vue d'identifier les opportunités de développement et de mesurer les menaces/risques de perte de marché",
+      "rncp": "Compétence présente en tout ou partie dans le référentiel 'Responsable du développement des affaires', RNCP n°34164",
+      "placeholder": "Décrivez le plan de veille que vous mettez en place pour Lumio Health : quelles étapes (collecte, exploitation, diffusion, conservation), quelles sources (concurrentielle, réglementaire, sectorielle medtech, RSE…), quelle fréquence et quels outils ? Montrez en quoi ce dispositif alimente directement le diagnostic stratégique de l'entreprise.",
+      "min_mots": 200,
+      "mots_cles": [
+        "collecte",
+        "exploitation",
+        "diffusion",
+        "conservation",
+        "sources",
+        "veille concurrentielle",
+        "veille réglementaire",
+        "medtech",
+        "fréquence",
+        "outils de veille",
+        "signal faible"
+      ],
+      "conseil": "Structurez votre réponse en 4 étapes clairement nommées. Citez au moins 4 types de sources différentes et précisez pour chacune l'objectif visé. Évitez les généralités : ancrez chaque élément dans l'univers Lumio (wearables, santé au travail, BtoB)."
+    },
+    {
+      "code": "1.1.2",
+      "label": "Etudier les opportunités et menaces, aux niveaux interne et externe, via un outil d'analyse stratégique, pour définir l'attractivité du marché potentiel ainsi que la compétitivité de l'entreprise/de la marque",
+      "rncp": "Compétence présente en tout ou partie dans le référentiel 'Responsable du développement des affaires', RNCP n°34164",
+      "placeholder": "Réalisez le diagnostic interne et externe de Lumio Health à l'aide d'un outil d'analyse stratégique (SWOT, PESTEL, Porter…). Identifiez les avantages concurrentiels décisifs, les faiblesses, les opportunités de développement les plus réalistes économiquement, et les menaces chiffrées (ex. : baisse tarifaire concurrente de 15 %).",
+      "min_mots": 250,
+      "mots_cles": [
+        "SWOT",
+        "diagnostic interne",
+        "diagnostic externe",
+        "avantage concurrentiel",
+        "faiblesse",
+        "opportunité",
+        "menace",
+        "attractivité",
+        "compétitivité",
+        "risque",
+        "faisabilité économique"
+      ],
+      "conseil": "Nommez explicitement l'outil utilisé et justifiez ce choix. Pour chaque quadrant ou axe, donnez au moins deux éléments propres à Lumio. Quantifiez les menaces dès que possible (données du marché, chiffres concurrents fournis dans les documents fictifs)."
+    },
+    {
+      "code": "1.2.1",
+      "label": "Décliner la stratégie commerciale de l'entreprise à l'échelle du périmètre en responsabilité, en ciblant ses clients, en considérant les axes de croissance définis par la direction générale ainsi que par la dimension RSE, afin de définir les objectifs de développement",
+      "rncp": "Compétence présente en tout ou partie dans le référentiel 'Responsable du développement des affaires', RNCP n°34164",
+      "placeholder": "Définissez la stratégie commerciale de Lumio Health pour le périmètre grands comptes BtoB : segmentation retenue, cible prioritaire (caractérisez le profil type du décideur), positionnement différenciateur. Fixez des objectifs de développement SMART en cohérence avec les ODD applicables (indiquez lesquels et pourquoi).",
+      "min_mots": 220,
+      "mots_cles": [
+        "segmentation",
+        "cible",
+        "positionnement",
+        "BtoB",
+        "grands comptes",
+        "objectifs SMART",
+        "ODD",
+        "RSE",
+        "différenciation",
+        "axe de croissance",
+        "direction générale"
+      ],
+      "conseil": "Formulez au moins deux objectifs en respectant les 5 critères SMART. Associez chaque objectif à un ODD précis (numéro + intitulé) et expliquez le lien concret avec l'activité de Lumio. Évitez les objectifs vagues comme 'augmenter les ventes'."
+    },
+    {
+      "code": "1.3.1",
+      "label": "Définir le Plan d'Action Commerciale (PAC), à l'aide de méthodes commerciales et marketing, afin de piloter la performance commerciale",
+      "rncp": "Compétence présente en tout ou partie dans le référentiel 'Responsable du développement des affaires', RNCP n°34164",
+      "placeholder": "Construisez le PAC de Lumio Health pour Q4 2024 : présentez-le sous forme structurée avec, pour chaque action, l'objectif visé, le responsable, les collaborateurs impliqués, le budget alloué, les dates de début et fin, et l'indicateur de résultat. Veillez à équilibrer les actions de détection, de conquête et de fidélisation.",
+      "min_mots": 300,
+      "mots_cles": [
+        "PAC",
+        "objectif",
+        "responsable",
+        "budget",
+        "planning",
+        "KPI",
+        "détection",
+        "conquête",
+        "fidélisation",
+        "action commerciale",
+        "méthode",
+        "pilotage",
+        "performance commerciale"
+      ],
+      "conseil": "Présentez le PAC sous forme de tableau ou de liste structurée avec les 6 colonnes minimales requises. Vérifiez que vous avez au moins une action par type (détection / conquête / fidélisation). Chaque objectif d'action doit être SMART. Nommez explicitement les membres de l'équipe Lumio dans la colonne 'responsable/collaborateurs'."
+    },
+    {
+      "code": "1.4.1",
+      "label": "Contribuer à l'élaboration du parcours client, en intégrant les principaux critères de choix des clients du secteur BtoB, et en le rendant accessible, dans une visée de satisfaction client ainsi qu'une démarche RSE",
+      "rncp": "Compétence présente en tout ou partie dans le référentiel 'Responsable du développement des affaires', RNCP n°34164",
+      "placeholder": "Cartographiez le parcours prospect/client type pour un grand compte comme Northgate : identifiez les étapes clés, les points de contact (y compris numériques et IA/bots), les critères de choix BtoB intégrés (prix, délai, modalités de commande et paiement). Précisez comment le parcours respecte le RGAA 4.1.2 et prend en compte l'impact environnemental.",
+      "min_mots": 220,
+      "mots_cles": [
+        "parcours client",
+        "points de contact",
+        "critères de choix",
+        "BtoB",
+        "prix",
+        "délai de livraison",
+        "passation de commande",
+        "paiement",
+        "IA",
+        "bot",
+        "RGAA 4.1.2",
+        "accessibilité",
+        "impact environnemental",
+        "RSE"
+      ],
+      "conseil": "Décrivez le parcours étape par étape (au moins 5 étapes). Pour chaque point de contact numérique, mentionnez une exigence RGAA 4.1.2 concrète. Intégrez au moins un usage d'IA (chatbot, recommandation, scoring) et justifiez sa pertinence dans le contexte Lumio. N'oubliez pas de mentionner un critère environnemental mesurable."
+    }
+  ],
+  "livrable": {
+    "format": "Document écrit structuré remis à Sonia Ferracci, comprenant : (1) Plan et méthodologie de veille, (2) Diagnostic commercial interne et externe, (3) Proposition de stratégie commerciale, (4) Plan d'Action Commerciale Q4 2024, (5) Cartographie du parcours prospect/client type Northgate",
+    "total_mots_min": 520,
+    "note_reflexive_min": 100
+  },
+  "jury_criteres_eliminatoires": [
+    "Le PAC ne comporte pas les 6 éléments minimaux requis (objectif, actions par objectif, responsable ET collaborateurs, budget alloué, dates de début et fin, résultat/indicateur obtenu) : livrable considéré comme incomplet.",
+    "Les rôles et responsabilités des membres de l'équipe Lumio (Sonia Ferracci, Camille Ott, Yassine Morel, Théo Marczak) ne sont pas distingués et attribués dans le PAC : absence de maîtrise de la dimension managériale du périmètre en responsabilité.",
+    "Aucun indicateur d'impact mesurable (KPI chiffré, seuil de performance, date d'échéance) n'est associé aux actions du PAC ou aux objectifs de la stratégie commerciale.",
+    "Le diagnostic stratégique ne mobilise aucun outil d'analyse nommé et structuré (SWOT, PESTEL, Porter ou équivalent) : l'absence de méthode invalide la compétence 1.1.2.",
+    "Les objectifs de développement (compétence 1.2.1) ne respectent pas les critères SMART et/ou ne sont associés à aucun ODD identifié et justifié.",
+    "Le parcours client ne mentionne ni les critères de choix BtoB (prix, délai, modalités de commande/paiement), ni les points de contact numériques conformes au RGAA 4.1.2, ni aucun usage de l'IA.",
+    "Le dispositif de veille ne distingue pas les quatre étapes (collecte, exploitation, diffusion, conservation) et ne cite pas de sources diversifiées cohérentes avec le secteur medtech/santé au travail."
+  ],
+  "documents_fictifs": [
+    {
+      "id": "DOC-01",
+      "type": "email",
+      "expediteur": "Jakob Rein (DRH, Northgate)",
+      "objet": "Demande de proposition commerciale — solution bien-être salarié Q4",
+      "role_narratif": "Déclencheur de l'affaire : Jakob Rein formalise la demande de Northgate, précise ses critères de choix (prix, déploiement multi-sites, accessibilité numérique), son calendrier de décision (30 septembre) et mentionne qu'un concurrent a déjà présenté une offre 15 % moins chère.",
+      "acte": 1
+    },
+    {
+      "id": "DOC-02",
+      "type": "note_interne",
+      "expediteur": "Théo Marczak (CEO, Lumio Health)",
+      "objet": "Cadrage stratégique — Priorités commerciales et RSE H2 2024",
+      "role_narratif": "Fixe les axes de croissance autorisés (grands comptes santé, Europe du Nord), les objectifs chiffrés de CA (+22 % sur grands comptes), les contraintes budgétaires et rappelle l'alignement obligatoire sur les ODD 3 (santé) et 8 (travail décent) de la feuille de route RSE 2025.",
+      "acte": 1
+    },
+    {
+      "id": "DOC-03",
+      "type": "rapport",
+      "expediteur": "Camille Ott (Responsable BtoB, Lumio Health)",
+      "objet": "Synthèse terrain — Marché santé-travail wearables BtoB, été 2024",
+      "role_narratif": "Fournit les données de marché clés : croissance +18 % sur 2 ans, deux concurrents identifiés avec baisse tarifaire de 15 %, cartographie des segments prioritaires, retours qualitatifs de 6 prospects grands comptes. Matière première pour le diagnostic externe et la segmentation.",
+      "acte": 2
+    },
+    {
+      "id": "DOC-04",
+      "type": "tableau_de_bord",
+      "expediteur": "Sonia Ferracci (Directrice Marketing, Lumio Health)",
+      "objet": "KPIs commerciaux Lumio H1 2024 — Bilan de performance",
+      "role_narratif": "Présente les forces et faiblesses internes : taux de conversion prospects (12 %), churn clients (8 %), NPS (67), délai moyen de déploiement (6 semaines), budget marketing disponible Q4 (38 000 €). Alimente le diagnostic interne (SWOT) et le calibrage du PAC.",
+      "acte": 2
+    },
+    {
+      "id": "DOC-05",
+      "type": "brief",
+      "expediteur": "Yassine Morel (Content Manager, Lumio Health)",
+      "objet": "Brief contenu Q4 — Contraintes budget zéro et calendrier éditorial",
+      "role_narratif": "Expose les contraintes de production de contenu (aucun budget additionnel, équipe 1 personne), propose 3 formats de contenu low-cost adaptés au parcours client BtoB (livre blanc, webinar, séquence email IA-assisted). Sert à calibrer les actions du PAC sur les phases de détection et de nurturing.",
+      "acte": 3
+    },
+    {
+      "id": "DOC-06",
+      "type": "compte_rendu_reunion",
+      "expediteur": "Camille Ott (Responsable BtoB, Lumio Health)",
+      "objet": "CR — Réunion de qualification Northgate du 5 septembre 2024",
+      "role_narratif": "Détaille les critères de choix exprimés par Jakob Rein lors du premier échange : accessibilité numérique de la plateforme (RGAA exigé contractuellement), délai de livraison maximal 3 semaines, paiement à 60 jours, modalité de commande via EDI. Indispensable pour la construction du parcours client.",
+      "acte": 3
+    },
+    {
+      "id": "DOC-07",
+      "type": "fiche_produit_interne",
+      "expediteur": "Théo Marczak (CEO, Lumio Health)",
+      "objet": "AURA V2 — Positionnement, différenciateurs et roadmap IA",
+      "role_narratif": "Décrit les nouvelles fonctionnalités AURA V2 (algorithme de scoring stress, chatbot d'onboarding RGAA-compliant, bilan carbone intégré), le positionnement prix premium justifié et les arguments de valeur RSE. Nourrit à la fois le positionnement stratégique et la section IA/accessibilité du parcours client.",
+      "acte": 4
+    },
+    {
+      "id": "DOC-08",
+      "type": "email",
+      "expediteur": "Jakob Rein (DRH, Northgate)",
+      "objet": "RE: Proposition Lumio — Points de blocage avant décision",
+      "role_narratif": "Jakob Rein signale deux points bloquants : le prix unitaire dépasse de 9 % l'enveloppe Northgate et la démonstration du chatbot n'était pas accessible (échec test RGAA). Crée une tension dramatique finale qui oblige à revoir le PAC et le parcours client pour les rendre décisifs avant le 30 septembre.",
+      "acte": 5
+    }
+  ],
+  "easter_egg": {
+    "type": "whatsapp",
+    "personnages": [
+      "Camille Ott",
+      "Yassine Morel"
+    ],
+    "tension_revelee": "Camille écrit à Yassine à 23h14 : 'Théo a validé le budget content à 0€ mais il vient de promettre à Jakob un livre blanc co-brandé pour vendredi. T'es au courant toi ? 😤' — Yassine répond : 'Première nouvelle. Et devine qui va le rédiger seul ce soir 🙃 La veille concurrentielle que j'ai remontée la semaine dernière il l'a même pas lue je pense.' Révèle un dysfonctionnement réel dans la diffusion de l'information de veille et un pilotage du PAC sans concertation des équipes terrain."
+  }
+}

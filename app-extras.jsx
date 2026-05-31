@@ -59,30 +59,30 @@ function FinderApp({ openFolder }) {
 
   const folders = {
     mission: {
-      title: 'Mission Lumio · Board BC2',
+      title: 'Mission Lumio · Campagne BC3',
       items: [
-        { name: 'Email de mission — Théo Marczak.eml', kind: 'mail', app: 'mail', props: { openId: 'brief' }, label: 'EML' },
-        { name: 'Email confidentiel — Jakob Rein.eml', kind: 'mail', app: 'mail', props: { openId: 'jakob' }, label: 'EML' },
-        { name: 'Deck Board Q3 2026 — Sonia.pdf', kind: 'pdf', app: 'pdf', label: 'PDF' },
-        { name: 'Note interne Théo (CONFIDENTIEL).rtf', kind: 'doc', app: 'notes', props: { openNote: 'theo' }, label: 'RTF' },
-        { name: 'Veille concurrentielle — Yassine.pdf', kind: 'pdf', app: 'pdf', label: 'PDF' },
-        { name: 'Verbatims Camille Ott — oct.m4a', kind: 'audio', app: 'voice', label: 'M4A' },
-        { name: 'Fiche contexte Lumio Health.pdf', kind: 'pdf', app: 'notes', props: { openNote: 'contexte' }, label: 'PDF' },
+        { name: 'Email de mission — Sonia Ferracci.eml', kind: 'mail', app: 'mail', props: { openId: 'brief' }, label: 'EML' },
+        { name: 'Email confidentiel — Théo Marczak.eml', kind: 'mail', app: 'mail', props: { openId: 'theo' }, label: 'EML' },
+        { name: 'Email client — Decathlon DRH.eml', kind: 'mail', app: 'mail', props: { openId: 'decathlon' }, label: 'EML' },
+        { name: 'Brief créatif — Alter Scope.pdf', kind: 'pdf', app: 'pdf', label: 'PDF' },
+        { name: 'Résultats & Budget — Yassine.pdf', kind: 'pdf', app: 'pdf', label: 'PDF' },
+        { name: 'Verbatims Camille Ott — jan.m4a', kind: 'audio', app: 'voice', label: 'M4A' },
+        { name: 'Fiche contexte Lumio Health.rtf', kind: 'doc', app: 'notes', props: { openNote: 'contexte' }, label: 'RTF' },
         { name: 'Revue de presse (3 articles)', kind: 'folder', folder: 'press' },
       ]
     },
     press: {
       title: 'Revue de presse',
       items: [
-        { name: 'lesechos-mdr-fracture.html', kind: 'doc', app: 'browser', props: { openTab: 'press-0' }, label: 'WEB' },
-        { name: 'hbr-stress-donnee-arme.html', kind: 'doc', app: 'browser', props: { openTab: 'press-1' }, label: 'WEB' },
-        { name: '20mn-apple-watch-confiance.html', kind: 'doc', app: 'browser', props: { openTab: 'press-2' }, label: 'WEB' }
+        { name: 'strategies-rse-campagne-bienetre.html', kind: 'doc', app: 'browser', props: { openTab: 'press-0' }, label: 'WEB' },
+        { name: 'cbnews-claim-propriete-intellectuelle.html', kind: 'doc', app: 'browser', props: { openTab: 'press-1' }, label: 'WEB' },
+        { name: 'maddyness-resultats-prematures.html', kind: 'doc', app: 'browser', props: { openTab: 'press-2' }, label: 'WEB' }
       ]
     },
     guide: {
       title: 'Guide de mission',
       items: [
-        { name: 'guide_mission_bc2.pdf', kind: 'pdf', app: 'pdf', props: { openGuide: true }, label: 'PDF' }
+        { name: 'guide_mission_bc3.pdf', kind: 'pdf', app: 'pdf', props: { openGuide: true }, label: 'PDF' }
       ]
     },
     portraits: {
@@ -90,9 +90,9 @@ function FinderApp({ openFolder }) {
       items: [
         { name: 'Théo Marczak — L\'Usine Digitale.html', kind: 'doc', app: 'browser', props: { openPortrait: 'theo' }, label: 'WEB' },
         { name: 'Sonia Ferracci — CB News.html', kind: 'doc', app: 'browser', props: { openPortrait: 'sonia' }, label: 'WEB' },
-        { name: 'Jakob Rein — Forbes.html', kind: 'doc', app: 'browser', props: { openPortrait: 'jakob' }, label: 'WEB' },
         { name: 'Camille Ott — Action Commerciale.html', kind: 'doc', app: 'browser', props: { openPortrait: 'camille' }, label: 'WEB' },
         { name: 'Yassine Morel — Maddyness.html', kind: 'doc', app: 'browser', props: { openPortrait: 'yassine' }, label: 'WEB' },
+        { name: 'Jakob Rein — Forbes.html', kind: 'doc', app: 'browser', props: { openPortrait: 'jakob' }, label: 'WEB' },
       ]
     }
   };
@@ -146,11 +146,11 @@ window.LUMIO_APPS.finder = FinderApp;
 
 // ─── CALENDAR ─────────────────────────────────────────────────
 function CalendarApp() {
-  const boardDay = 16;  // vendredi 16 octobre = board Northgate
-  const deadlineDay = 15; // jeudi 15 oct. = deadline reco
-  const startOffset = 3; // Oct 2026 commence un jeudi → lun=0, jeu=3
+  const boardDay = 27;    // lundi 27 janvier = board Lumio
+  const deadlineDay = 24; // vendredi 24 jan. = deadline rapport
+  const startOffset = 2;  // Janvier 2027 commence un vendredi → offset pour lun=0 : mer=2
 
-  const [currentDay, setCurrentDay] = React.useState(() => window.__getFictifTime ? window.__getFictifTime().day : 12);
+  const [currentDay, setCurrentDay] = React.useState(() => window.__getFictifTime ? window.__getFictifTime().day : 19);
   React.useEffect(() => {
     const id = setInterval(() => {
       if (window.__getFictifTime) setCurrentDay(window.__getFictifTime().day);
@@ -162,25 +162,23 @@ function CalendarApp() {
   const daysLeft = Math.max(0, deadlineDay - today);
 
   const events = {
-    13: [{ label: 'Arrivée Jakob à Paris (soir)', color: '#1b3a6b', bg: 'rgba(27,58,107,0.12)' }],
-    14: [{ label: 'Draft reco attendu avant dîner', color: '#c4420f', bg: 'rgba(196,66,15,0.12)', bold: true }],
-    15: [{ label: '⚠ Deadline reco · 20h00', color: '#c4420f', bg: 'rgba(196,66,15,0.2)', bold: true }],
-    16: [{ label: '09h — Board Northgate Capital', color: '#fff', bg: '#1b3a6b', bold: true }],
-    20: [{ label: 'Relance TÜV — MDR', color: '#0a7a6e', bg: 'rgba(10,122,110,0.12)' }],
-    22: [{ label: 'RDV Malakoff Humanis — Camille', color: '#0a7a6e', bg: 'rgba(10,122,110,0.12)' }],
-    27: [{ label: 'CODIR mensuel', color: '#5c2d8f', bg: 'rgba(92,45,143,0.1)' }],
-    30: [{ label: 'Clôture Q4 · reporting', color: '#9a9ea8', bg: 'rgba(154,158,168,0.1)' }],
+    19: [{ label: '07h15 — Mission Sonia reçue', color: '#c4420f', bg: 'rgba(196,66,15,0.12)', bold: true }],
+    21: [{ label: 'Réponse avocate — claim', color: '#1b3a6b', bg: 'rgba(27,58,107,0.1)' }],
+    22: [{ label: 'Renouvellement contrat Decathlon', color: '#0a7a6e', bg: 'rgba(10,122,110,0.1)' }],
+    24: [{ label: '⚠ Deadline rapport · 17h00', color: '#c4420f', bg: 'rgba(196,66,15,0.2)', bold: true }],
+    27: [{ label: '09h — Board Lumio', color: '#fff', bg: '#1b3a6b', bold: true }],
+    28: [{ label: 'Forum Préventica — inscription', color: '#9a9ea8', bg: 'rgba(154,158,168,0.1)' }],
   };
 
-  const urgencyColor = daysLeft <= 3 ? '#c4420f' : daysLeft <= 7 ? '#b85c00' : '#1b3a6b';
-  const urgencyBg = daysLeft <= 3 ? 'rgba(196,66,15,0.1)' : daysLeft <= 7 ? 'rgba(184,92,0,0.1)' : 'rgba(27,58,107,0.1)';
+  const urgencyColor = daysLeft <= 2 ? '#c4420f' : daysLeft <= 5 ? '#b85c00' : '#1b3a6b';
+  const urgencyBg = daysLeft <= 2 ? 'rgba(196,66,15,0.1)' : daysLeft <= 5 ? 'rgba(184,92,0,0.1)' : 'rgba(27,58,107,0.1)';
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'white', overflow: 'hidden' }}>
       <div style={{ padding: '14px 22px', borderBottom: '1px solid var(--rule)', display: 'flex', alignItems: 'center', gap: 16, flexShrink: 0 }}>
         <div>
-          <div style={{ fontSize: 20, fontWeight: 600, color: 'var(--ink)' }}>Octobre 2026</div>
-          <div style={{ fontSize: 11, color: 'var(--ink-faint)', marginTop: 2, fontFamily: 'var(--font-mono)' }}>Aujourd'hui — lundi 12 oct.</div>
+          <div style={{ fontSize: 20, fontWeight: 600, color: 'var(--ink)' }}>Janvier 2027</div>
+          <div style={{ fontSize: 11, color: 'var(--ink-faint)', marginTop: 2, fontFamily: 'var(--font-mono)' }}>Aujourd'hui — mardi 19 jan.</div>
         </div>
         <div style={{ flex: 1 }} />
         <div style={{ textAlign: 'center', padding: '8px 16px', background: urgencyBg, borderRadius: 8, border: `1px solid ${urgencyColor}22` }}>
@@ -193,15 +191,15 @@ function CalendarApp() {
         <div style={{ display: 'flex', gap: 24, fontSize: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent)' }} />
-            <span style={{ color: 'var(--ink-soft)' }}>Deadline reco <strong style={{ color: 'var(--ink)' }}>jeu. 15 oct. 20h</strong></span>
+            <span style={{ color: 'var(--ink-soft)' }}>Deadline rapport <strong style={{ color: 'var(--ink)' }}>ven. 24 jan. 17h</strong></span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#1b3a6b' }} />
-            <span style={{ color: 'var(--ink-soft)' }}>Board Northgate <strong style={{ color: 'var(--ink)' }}>ven. 16 oct.</strong></span>
+            <span style={{ color: 'var(--ink-soft)' }}>Board Lumio <strong style={{ color: 'var(--ink)' }}>lun. 27 jan. 09h</strong></span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#0a7a6e' }} />
-            <span style={{ color: 'var(--ink-soft)' }}>Malakoff Humanis AO <strong style={{ color: 'var(--ink)' }}>MDR obligatoire</strong></span>
+            <span style={{ color: 'var(--ink-soft)' }}>Decathlon — renouvellement <strong style={{ color: 'var(--ink)' }}>147K€ en jeu</strong></span>
           </div>
         </div>
       </div>
@@ -251,8 +249,8 @@ function CalendarApp() {
       </div>
 
       <div style={{ padding: '10px 22px', borderTop: '1px solid var(--rule)', background: '#fafaf8', fontSize: 11, color: 'var(--ink-mute)', fontStyle: 'italic', flexShrink: 0 }}>
-        Jakob Rein attend une recommandation. Pas un audit. Pas une liste d'options.
-        <strong style={{ color: 'var(--ink)', fontStyle: 'normal' }}> Un scénario retenu, argumenté, avec objectifs et projection budgétaire.</strong>
+        Théo présente au board lundi matin. Il a besoin d'une lecture externe, pas de celle de Sonia.
+        <strong style={{ color: 'var(--ink)', fontStyle: 'normal' }}> Rapport d'étape + Plan de reprise. Vendredi 17h.</strong>
       </div>
     </div>
   );
