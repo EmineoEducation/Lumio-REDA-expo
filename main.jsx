@@ -1,34 +1,37 @@
 // ══════════════════════════════════════════════════════════════
-//  LOGIN SCREEN + ROOT APP
+//  LOGIN SCREEN + ROOT APP — BC01 REDA
+//  fix : restauration session au reload (pas de retour landing)
+//  ajout : slide de présentation Lumio après CGU
 // ══════════════════════════════════════════════════════════════
-const { useState: useRootState, useEffect: useRootEffect, useRef: useRootRef } = React;
+const { useState: useRootState, useEffect: useRootEffect } = React;
 
-// ─── SESSION BACKEND ─────────────────────────────────────────
 function makeSessionId(name) {
   let h = 0;
   for (let i = 0; i < name.length; i++) h = Math.imul(31, h) + name.charCodeAt(i) | 0;
-  return 'sid_' + Math.abs(h).toString(36);
+  return 'reda_bc01_' + Math.abs(h).toString(36);
 }
+
 async function apiSession(method, id, data) {
   try {
     if (method === 'GET') {
       const r = await fetch(`/api/session?id=${encodeURIComponent(id)}`);
       if (r.status === 404) return null;
-      return (await r.json()).session || null;
+      const j = await r.json();
+      return j.session || null;
     }
-    const opts = { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, session: data }) };
-    if (method === 'DELETE') opts.body = JSON.stringify({ id });
+    const opts = { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(method === 'DELETE' ? { id } : { id, session: data }) };
     await fetch('/api/session', opts);
-  } catch (e) { console.warn('Session error:', e); }
+  } catch(e) { console.warn('Session error:', e); }
   return null;
 }
+
 window.LUMIO_SESSION = {
   save: (id, data) => apiSession('POST', id, data),
   load: (id) => apiSession('GET', id),
   clear: (id) => apiSession('DELETE', id),
 };
 
-// ─── Saisie du nom (avant le login) ─────────────────────────
+// ─── Name Screen ─────────────────────────────────────────────
 function NameScreen({ onConfirm }) {
   const [prenom, setPrenom] = useRootState('');
   const [nom, setNom] = useRootState('');
@@ -40,16 +43,9 @@ function NameScreen({ onConfirm }) {
 
   const confirm = () => {
     setEmailError('');
-    if (!prenom.trim()) {
-      setShake(true);
-      setTimeout(() => setShake(false), 500);
-      return;
-    }
+    if (!prenom.trim()) { setShake(true); setTimeout(() => setShake(false), 500); return; }
     if (!email.trim() || !isValidEmail(email)) {
-      setEmailError('Un email valide est requis pour recevoir ton portfolio.');
-      setShake(true);
-      setTimeout(() => setShake(false), 500);
-      return;
+      setEmailError('Un email valide est requis.'); setShake(true); setTimeout(() => setShake(false), 500); return;
     }
     const full = `${prenom.trim()}${nom.trim() ? ' ' + nom.trim() : ''}`;
     window.LUMIO_DATA.student.name = full;
@@ -58,382 +54,282 @@ function NameScreen({ onConfirm }) {
     onConfirm(full, email.trim().toLowerCase());
   };
 
-  const inputStyle = (filled) => ({
-    width: '100%', padding: '10px 14px',
-    border: filled ? '1.5px solid rgba(255,255,255,0.5)' : '1.5px solid rgba(255,255,255,0.2)',
-    borderRadius: 10, background: 'rgba(255,255,255,0.15)',
-    color: 'white', fontSize: 14, outline: 'none', transition: 'border-color .2s'
-  });
+  const inp = (filled) => ({ width: '100%', padding: '10px 14px', border: filled ? '1.5px solid rgba(255,255,255,0.5)' : '1.5px solid rgba(255,255,255,0.2)', borderRadius: 10, background: 'rgba(255,255,255,0.12)', color: 'white', fontSize: 14, outline: 'none' });
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0,
-      background: `
-        radial-gradient(ellipse at 30% 20%, #f5d5b8 0%, transparent 50%),
-        radial-gradient(ellipse at 75% 80%, #98a8c8 0%, transparent 60%),
-        linear-gradient(160deg, #d8a098 0%, #5878a8 100%)
-      `,
-      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      color: 'white', padding: '2rem'
-    }}>
-      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.3em', textTransform: 'uppercase', opacity: 0.7, marginBottom: 8 }}>{`PAC · ${window.PASS_CONFIG?.formation || 'MSMC'} · ${window.PASS_CONFIG?.bloc || 'BC'}`}</div>
-      <div style={{ fontFamily: 'var(--font-display)', fontSize: 48, fontWeight: 200, letterSpacing: '-0.02em', marginBottom: 8, textShadow: '0 2px 12px rgba(0,0,0,0.2)' }}>Lumio Health</div>
-      <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 18, opacity: 0.7, marginBottom: 40 }}>{window.PASS_CONFIG?.accroche || window.PASS_CONFIG?.titre_affaire || 'Une affaire à résoudre'}</div>
-
-      <div style={{
-        background: 'rgba(255,255,255,0.12)',
-        backdropFilter: 'blur(16px)',
-        border: '1px solid rgba(255,255,255,0.25)',
-        borderRadius: 16,
-        padding: '32px 36px',
-        width: '100%', maxWidth: 440,
-        textAlign: 'center',
-        animation: shake ? 'shake 0.4s ease' : 'none'
-      }}>
-        <div style={{ fontSize: 13, opacity: 0.85, marginBottom: 22, lineHeight: 1.6 }}>
-          Tu vas entrer dans ce dossier en tant que consultant·e externe.<br/>
-          <span style={{ opacity: 0.7 }}>Identifie-toi pour recevoir ton portfolio de compétences.</span>
+    <div style={{ position: 'fixed', inset: 0, background: 'radial-gradient(ellipse at 25% 25%, #0d5a4e 0%, transparent 55%), linear-gradient(160deg, #0B2B2D 0%, #1a2a3a 100%)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'white', padding: '2rem' }}>
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.3em', textTransform: 'uppercase', opacity: 0.6, marginBottom: 8 }}>PAC · Bach REDA · BC01</div>
+      <div style={{ fontFamily: 'var(--font-display)', fontSize: 48, fontWeight: 200, letterSpacing: '-0.02em', marginBottom: 6 }}>Lumio Health</div>
+      <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 18, opacity: 0.6, marginBottom: 40 }}>Un périmètre à reprendre</div>
+      <div style={{ background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.18)', borderRadius: 16, padding: '32px 36px', width: '100%', maxWidth: 440, textAlign: 'center', animation: shake ? 'shake 0.4s ease' : 'none' }}>
+        <div style={{ fontSize: 13, opacity: 0.8, marginBottom: 22, lineHeight: 1.6 }}>
+          Tu vas entrer dans cette affaire en tant que<br/>
+          <strong>Responsable commercial Île-de-France</strong>.<br/>
+          <span style={{ opacity: 0.6 }}>Identifie-toi pour recevoir ton portfolio de compétences.</span>
         </div>
-
-        {/* Prénom + Nom */}
-        <div style={{ display: 'flex', gap: 10, marginBottom: 12, width: '100%' }}>
-          <input
-            value={prenom}
-            onChange={e => setPrenom(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter') confirm(); }}
-            placeholder="Prénom *"
-            autoFocus
-            className="placeholder-dark"
-            style={inputStyle(prenom.trim())}
-          />
-          <input
-            value={nom}
-            onChange={e => setNom(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter') confirm(); }}
-            placeholder="Nom"
-            className="placeholder-dark"
-            style={inputStyle(nom.trim())}
-          />
+        <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
+          <input value={prenom} onChange={e => setPrenom(e.target.value)} onKeyDown={e => e.key === 'Enter' && confirm()} placeholder="Prénom *" autoFocus className="placeholder-dark" style={inp(prenom.trim())} />
+          <input value={nom} onChange={e => setNom(e.target.value)} onKeyDown={e => e.key === 'Enter' && confirm()} placeholder="Nom" className="placeholder-dark" style={inp(nom.trim())} />
         </div>
-
-        {/* Email école */}
         <div style={{ marginBottom: 20 }}>
-          <input
-            type="email"
-            value={email}
-            onChange={e => { setEmail(e.target.value); setEmailError(''); }}
-            onKeyDown={e => { if (e.key === 'Enter') confirm(); }}
-            placeholder="Email école (ex: prenom.nom@emineo.fr)"
-            className="placeholder-dark"
-            style={{
-              ...inputStyle(isValidEmail(email)),
-              width: '100%',
-              border: isValidEmail(email)
-                ? '1.5px solid rgba(255,255,255,0.5)'
-                : '1.5px solid rgba(255,255,255,0.2)'
-            }}
-          />
+          <input type="email" value={email} onChange={e => { setEmail(e.target.value); setEmailError(''); }} onKeyDown={e => e.key === 'Enter' && confirm()} placeholder="Email école" className="placeholder-dark" style={{ ...inp(isValidEmail(email)), width: '100%' }} />
+          {emailError && <div style={{ fontSize: 11, color: '#f5a623', marginTop: 4 }}>{emailError}</div>}
         </div>
-
-        <button
-          onClick={confirm}
-          style={{
-            width: '100%', padding: '11px',
-            background: prenom.trim() ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.3)',
-            color: prenom.trim() ? '#1a2436' : 'rgba(255,255,255,0.5)',
-            border: 'none', borderRadius: 10,
-            fontSize: 13, fontWeight: 600,
-            cursor: prenom.trim() ? 'pointer' : 'default',
-            transition: 'all .2s', fontFamily: 'inherit'
-          }}
-        >
+        <button onClick={confirm} style={{ width: '100%', padding: '11px', background: prenom.trim() ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.2)', color: prenom.trim() ? '#0B2B2D' : 'rgba(255,255,255,0.4)', border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: prenom.trim() ? 'pointer' : 'default', fontFamily: 'inherit' }}>
           Entrer dans l'affaire →
         </button>
-        {(!prenom.trim() || emailError) && (
-          <div style={{ fontSize: 11, opacity: 0.5, marginTop: 10 }}>
-            {emailError || 'Le prénom est requis'}
-          </div>
-        )}
       </div>
     </div>
   );
 }
 
-function LoginScreen({ onLogin, studentName }) {
-  const [stage, setStage] = useRootState('idle');
-  const [pwd, setPwd] = useRootState('');
-  const initial = window.LUMIO_DATA?.student?.initial || studentName?.[0]?.toUpperCase() || '?';
+// ─── Slide présentation Lumio ─────────────────────────────────
+function LumioIntroSlide({ studentName, onClose }) {
+  const prenom = studentName.split(' ')[0];
+  const [step, setStep] = useRootState(0);
 
-  const onUnlock = () => {
-    if (stage === 'unlocking') return;
-    setStage('unlocking');
-    setTimeout(() => onLogin(), 1200);
-  };
+  const slides = [
+    {
+      icon: '🏢',
+      titre: 'Lumio Health',
+      contenu: 'Medtech parisienne fondée en 2018 par Théo Marczak. Spécialiste des wearables de mesure du stress chronique en entreprise. 180 clients B2B actifs en France.'
+    },
+    {
+      icon: '📍',
+      titre: 'Ton périmètre — Île-de-France',
+      contenu: '47 comptes B2B actifs. CA récurrent 1,24 M€. Périmètre laissé sans pilote depuis 6 mois. Trois comptes stratégiques en danger silencieux que le CRM ne révèle pas.'
+    },
+    {
+      icon: '⚡',
+      titre: 'La tension principale',
+      contenu: 'Le concurrent Moodwork vient d\'obtenir la certification MDR et signe des comptes en IDF. Lumio attend sa propre certification (Q2 2027 au mieux). Budget prospection gelé à 8 000 € pour H2.'
+    },
+    {
+      icon: '🎯',
+      titre: 'Ta mission',
+      contenu: 'Théo Marczak te demande un plan d\'action commercial complet pour le CODIR du vendredi 19 septembre. Tu as 10 jours fictifs (= 3h30 réelles). Commence par les emails.'
+    },
+  ];
+
+  const slide = slides[step];
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0,
-      background: `
-        radial-gradient(ellipse at 30% 20%, #f5d5b8 0%, transparent 50%),
-        radial-gradient(ellipse at 75% 80%, #98a8c8 0%, transparent 60%),
-        linear-gradient(160deg, #d8a098 0%, #5878a8 100%)
-      `,
-      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      color: 'white',
-      animation: stage === 'unlocking' ? 'fadeOutLogin 1.1s forwards' : 'none'
-    }}>
-      <div style={{ textAlign: 'center', marginBottom: 40 }}>
-        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.3em', textTransform: 'uppercase', opacity: 0.8, marginBottom: 8 }}>mardi 19 janvier 2027</div>
-        <div style={{ fontSize: 96, fontWeight: 200, fontFamily: 'var(--font-display)', letterSpacing: '-0.02em', lineHeight: 1, textShadow: '0 2px 12px rgba(0,0,0,0.2)' }}>07:15</div>
-      </div>
-
-      <div style={{
-        width: 130, height: 130, borderRadius: '50%',
-        background: 'linear-gradient(135deg, #c4420f 0%, #8a2d05 100%)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: 56, fontWeight: 200, fontFamily: 'var(--font-display)',
-        color: 'white', marginBottom: 14,
-        boxShadow: '0 12px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.3)'
-      }}>{initial}</div>
-      <div style={{ fontSize: 22, fontWeight: 500, marginBottom: 28, fontFamily: 'var(--font-display)' }}>{studentName}</div>
-
-      <div style={{ position: 'relative', marginBottom: 16 }}>
-        <input
-          type="password"
-          value={pwd}
-          onChange={(e) => setPwd(e.target.value)}
-          onFocus={() => setStage('typing')}
-          onKeyDown={(e) => { if (e.key === 'Enter') onUnlock(); }}
-          placeholder="Mot de passe"
-          autoFocus
-          style={{
-            width: 280, padding: '10px 16px',
-            border: 'none', borderRadius: 22,
-            background: 'rgba(255,255,255,0.18)',
-            backdropFilter: 'blur(12px)',
-            color: 'white', fontSize: 14, textAlign: 'center',
-            outline: '1.5px solid rgba(255,255,255,0.3)'
-          }}
-        />
-        <button onClick={onUnlock} style={{
-          position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)',
-          width: 28, height: 28, borderRadius: '50%',
-          background: 'rgba(255,255,255,0.3)', color: 'white',
-          border: 'none', cursor: 'pointer', fontSize: 14
-        }}>↑</button>
-      </div>
-      <div style={{ fontSize: 11, opacity: 0.7, fontStyle: 'italic' }}>Touch ID ou mot de passe pour déverrouiller</div>
-      <div style={{ position: 'absolute', bottom: 32, left: 0, right: 0, textAlign: 'center', fontSize: 11, opacity: 0.7, letterSpacing: '0.1em' }}>
-        ⏏ Annuler · ⏻ Éteindre · ⟲ Redémarrer
-      </div>
-      {stage === 'unlocking' && (
-        <div style={{ position: 'absolute', bottom: 80, fontFamily: 'var(--font-mono)', fontSize: 11, opacity: 0.85, letterSpacing: '0.12em' }}>
-          Déverrouillage en cours…
+    <div style={{ position: 'fixed', inset: 0, zIndex: 12500, background: 'rgba(11,43,45,0.97)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', animation: 'fadeIn 0.4s ease' }}>
+      <div style={{ width: '100%', maxWidth: 520, background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(16px)', borderRadius: 16, border: '1px solid rgba(255,255,255,0.12)', padding: '36px 40px', textAlign: 'center' }}>
+        {/* Dots navigation */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginBottom: 28 }}>
+          {slides.map((_, i) => <div key={i} style={{ width: 6, height: 6, borderRadius: '50%', background: i === step ? '#5DE298' : 'rgba(255,255,255,0.2)', transition: 'all 0.2s', cursor: 'pointer' }} onClick={() => setStep(i)} />)}
         </div>
-      )}
+
+        <div style={{ fontSize: 40, marginBottom: 16 }}>{slide.icon}</div>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 500, color: 'white', marginBottom: 14 }}>{slide.titre}</div>
+        <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', lineHeight: 1.75, marginBottom: 32 }}>{slide.contenu}</div>
+
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+          {step > 0 && (
+            <button onClick={() => setStep(s => s - 1)} style={{ padding: '10px 20px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 8, color: 'white', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>← Précédent</button>
+          )}
+          {step < slides.length - 1
+            ? <button onClick={() => setStep(s => s + 1)} style={{ padding: '10px 24px', background: '#0a7a6e', border: 'none', borderRadius: 8, color: 'white', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Suivant →</button>
+            : <button onClick={onClose} style={{ padding: '10px 28px', background: '#5DE298', border: 'none', borderRadius: 8, color: '#0B2B2D', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>Commencer l'affaire →</button>
+          }
+        </div>
+      </div>
+      <div style={{ marginTop: 16, fontSize: 11, color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-mono)' }}>{prenom} · Responsable commercial IDF · Lumio Health</div>
     </div>
   );
 }
 
-// ─── Welcome overlay ─────────────────────────────────────────
+// ─── Login (verrou) ───────────────────────────────────────────
+function LoginScreen({ onLogin, studentName }) {
+  const [unlocking, setUnlocking] = useRootState(false);
+  const initial = window.LUMIO_DATA?.student?.initial || studentName?.[0]?.toUpperCase() || '?';
+  const onUnlock = () => { setUnlocking(true); setTimeout(onLogin, 800); };
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 11000, background: 'radial-gradient(ellipse at 25% 25%, #0d5a4e 0%, transparent 55%), linear-gradient(160deg, #0B2B2D 0%, #1a2a3a 100%)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 20 }}>
+      <div style={{ width: 72, height: 72, borderRadius: '50%', background: '#0a7a6e', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, fontWeight: 700, color: 'white' }}>{initial}</div>
+      <div style={{ fontFamily: 'var(--font-display)', fontSize: 24, color: 'white', fontWeight: 300 }}>{studentName}</div>
+      <div style={{ fontSize: 11, opacity: 0.5, color: 'white', fontFamily: 'var(--font-mono)' }}>Responsable commercial IDF · Lumio Health</div>
+      <div style={{ position: 'relative' }}>
+        <input onKeyDown={e => e.key === 'Enter' && onUnlock()} placeholder="Appuyer sur Entrée pour déverrouiller" className="placeholder-dark" style={{ width: 280, padding: '10px 48px 10px 16px', border: '1.5px solid rgba(255,255,255,0.2)', borderRadius: 22, background: 'rgba(255,255,255,0.12)', color: 'white', fontSize: 13, textAlign: 'center', outline: 'none' }} />
+        <button onClick={onUnlock} style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', width: 28, height: 28, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', cursor: 'pointer', fontSize: 14 }}>↑</button>
+      </div>
+      {unlocking && <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Déverrouillage…</div>}
+    </div>
+  );
+}
+
+// ─── Welcome Brief ────────────────────────────────────────────
 function WelcomeBriefCard({ onClose, studentName }) {
   const prenom = studentName.split(' ')[0];
   const [accepted, setAccepted] = useRootState(false);
+  const [showIntro, setShowIntro] = useRootState(false);
 
-  const handleStart = () => {
-    if (!accepted) return;
-    onClose();
-  };
+  if (showIntro) return <LumioIntroSlide studentName={studentName} onClose={onClose} />;
 
-  // Blocs actes pour visualiser le temps
   const actes = [
-    { n: '1', label: 'Ancrage terrain', dur: '20 min', color: '#7a756c' },
-    { n: '2', label: 'Entrée dans l\'affaire', dur: '30 min', color: '#1b4f8a' },
-    { n: '3', label: 'Diagnostic', dur: '45 min', color: '#1a6641' },
-    { n: '4', label: 'Production', dur: '1h20', color: '#c4420f', bold: true },
-    { n: '5', label: 'Réflexion', dur: '35 min', color: '#7a756c' },
+    { n:'1', label:'Premier jour', dur:'20 min', color:'#5c6878' },
+    { n:'2', label:'État du terrain', dur:'30 min', color:'#1b4f8a' },
+    { n:'3', label:'Hypothèse', dur:'45 min', color:'#0a7a6e' },
+    { n:'4', label:'Production', dur:'1h20', color:'#c4420f', bold:true },
+    { n:'5', label:'Portfolio', dur:'35 min', color:'#0a7a6e' },
   ];
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 12000,
-      background: 'rgba(20,24,36,0.65)',
-      backdropFilter: 'blur(10px)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      animation: 'fadeIn 400ms ease-out',
-      padding: '1rem',
-      overflowY: 'auto'
-    }}>
-      <div style={{
-        width: '100%', maxWidth: 580, background: 'white', borderRadius: 14,
-        padding: '32px 36px', boxShadow: '0 30px 80px rgba(0,0,0,0.45)'
-      }}>
-        {/* Header */}
-        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.25em', color: 'var(--accent)', textTransform: 'uppercase', marginBottom: 10 }}>{`PAC · ${window.PASS_CONFIG?.formation || 'MSMC'} ${window.PASS_CONFIG?.code_rncp || 'RNCP 38504'} · Bloc ${window.PASS_CONFIG?.bloc || ''}`}</div>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 600, color: 'var(--ink)', lineHeight: 1.15, marginBottom: 14 }}>
-          Bienvenue, {prenom}.
-        </h1>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 12000, background: 'rgba(20,24,36,0.65)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', overflowY: 'auto', animation: 'fadeIn 400ms ease-out' }}>
+      <div style={{ width: '100%', maxWidth: 580, background: 'white', borderRadius: 14, padding: '32px 36px', boxShadow: '0 30px 80px rgba(0,0,0,0.45)' }}>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.25em', color: '#0a7a6e', textTransform: 'uppercase', marginBottom: 10 }}>PAC · Bach REDA · BC01</div>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 600, color: 'var(--ink)', lineHeight: 1.15, marginBottom: 14 }}>Bienvenue, {prenom}.</h1>
         <p style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--ink-soft)', marginBottom: 10 }}>
-          Tu es <strong>{studentName}</strong>, {window.PASS_CONFIG?.role_etudiant || 'consultant·e externe'}. {window.PASS_CONFIG?.situation || window.LUMIO_DATA?.contexte?.body?.substring(0, 300) || ''}
+          Tu es <strong>{studentName}</strong>, Responsable commercial IDF chez Lumio Health. Premier lundi. Théo Marczak te demande un <strong>plan d'action commercial complet</strong> pour le CODIR de vendredi 19 septembre. <em>Le budget est de 8 000 €. Les vrais chiffres ne sont pas dans le CRM.</em>
         </p>
 
-        {/* Bloc temporel — central */}
-        <div style={{ background: '#1a2436', borderRadius: 10, padding: '16px 20px', marginBottom: 16 }}>
+        {/* Timeline */}
+        <div style={{ background: '#0B2B2D', borderRadius: 10, padding: '16px 20px', marginBottom: 16 }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 12 }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 26, fontWeight: 700, color: 'white', letterSpacing: '-0.02em' }}>3h30</span>
-            <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', fontFamily: 'var(--font-mono)' }}>=</span>
-            <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)' }}>3 semaines dans la vraie vie</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 26, fontWeight: 700, color: 'white' }}>3h30</span>
+            <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>= 18 jours fictifs (lun. 1er → ven. 19 sept. 2026)</span>
           </div>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {actes.map(a => (
-              <div key={a.n} style={{
-                flex: '1 1 80px',
-                background: a.bold ? a.color : 'rgba(255,255,255,0.07)',
-                border: `1px solid ${a.bold ? 'transparent' : 'rgba(255,255,255,0.12)'}`,
-                borderRadius: 7, padding: '8px 10px'
-              }}>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: a.bold ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.4)', letterSpacing: '0.1em', marginBottom: 3 }}>ACTE {a.n}</div>
+              <div key={a.n} style={{ flex: '1 1 80px', background: a.bold ? a.color : 'rgba(255,255,255,0.07)', border: `1px solid ${a.bold ? 'transparent' : 'rgba(255,255,255,0.1)'}`, borderRadius: 7, padding: '8px 10px' }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em', marginBottom: 3 }}>ACTE {a.n}</div>
                 <div style={{ fontSize: 11, color: a.bold ? 'white' : 'rgba(255,255,255,0.65)', fontWeight: a.bold ? 600 : 400, lineHeight: 1.3, marginBottom: 4 }}>{a.label}</div>
                 <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: a.bold ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.4)', fontWeight: a.bold ? 700 : 400 }}>{a.dur}</div>
               </div>
             ))}
           </div>
-          <div style={{ marginTop: 12, fontSize: 12, color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', lineHeight: 1.5 }}>
-            ⏱ L'horloge tourne dès que tu cliques sur "Commencer". Garde un œil dessus — le RP ne rallongera pas les actes.
-          </div>
         </div>
 
-        {/* Règles du jeu */}
+        {/* Règles */}
         <div style={{ background: '#f7f4ef', borderRadius: 8, padding: '14px 18px', marginBottom: 16 }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--ink)', fontFamily: 'var(--font-mono)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 10 }}>Trois règles, pas de négociation</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {[
-              { ico: '📄', txt: 'Tout ce que tu sais, c\'est dans les documents. Brief, budget, signaux clients, verbatims Camille — lis tout avant de conclure.' },
-              { ico: '🤐', txt: 'Sonia ne te dira pas "si c\'est juste". Elle est en position difficile — elle a pris des décisions qui ont mené là. Lis ses réponses pour ce qu\'elles sont.' },
-              { ico: '💬', txt: 'Quand tu as une première lecture → Slack → Sonia. Sa réaction t\'apportera ce que les documents ne disent pas.' },
-            ].map((r, i) => (
-              <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                <span style={{ fontSize: 16, flexShrink: 0 }}>{r.ico}</span>
-                <span style={{ fontSize: 13, color: '#2a2620', lineHeight: 1.55 }}>{r.txt}</span>
-              </div>
-            ))}
-          </div>
+          {[
+            { ico:'📄', txt:'Les vrais chiffres ne sont pas dans le CRM. Écoute le mémo vocal de Camille avant de regarder Salesforce.' },
+            { ico:'💬', txt:'Envoie tes hypothèses à Camille sur Slack. Elle ne valide pas — elle questionne.' },
+            { ico:'✅', txt:'Après 2 échanges Slack, le Livrable se débloque. C.1.1 Veille · C.1.2 Diagnostic · C.1.3 PAC.' },
+            { ico:'⚠️', txt:'Note : les personnages et entreprises de ce PAC sont entièrement fictifs. Ne tentez pas de les contacter.' },
+          ].map((r, i) => (
+            <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginBottom: 8 }}>
+              <span style={{ fontSize: 16, flexShrink: 0 }}>{r.ico}</span>
+              <span style={{ fontSize: 13, color: i === 3 ? '#c4420f' : '#2a2620', lineHeight: 1.55, fontWeight: i === 3 ? 500 : 400 }}>{r.txt}</span>
+            </div>
+          ))}
         </div>
 
-        {/* Checkbox engagement + bouton */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20, cursor: 'pointer' }} onClick={() => setAccepted(a => !a)}>
-          <div style={{
-            width: 18, height: 18, borderRadius: 4, flexShrink: 0,
-            border: accepted ? 'none' : '1.5px solid #c4420f',
-            background: accepted ? '#c4420f' : 'transparent',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            transition: 'all .15s'
-          }}>
+          <div style={{ width: 18, height: 18, borderRadius: 4, flexShrink: 0, border: accepted ? 'none' : '1.5px solid #0a7a6e', background: accepted ? '#0a7a6e' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {accepted && <span style={{ color: 'white', fontSize: 11, fontWeight: 700 }}>✓</span>}
           </div>
-          <span style={{ fontSize: 13, color: 'var(--ink-soft)', lineHeight: 1.4 }}>
-            J'ai lu les règles. Je suis prêt·e à entrer dans l'affaire.
-          </span>
+          <span style={{ fontSize: 13, color: 'var(--ink-soft)', lineHeight: 1.4 }}>J'ai lu les règles. Je comprends que les personnages et entreprises sont fictifs.</span>
         </div>
-
-        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <button onClick={handleStart} style={{
-            padding: '11px 26px',
-            background: accepted ? 'var(--ink)' : '#d8d2c6',
-            color: accepted ? 'white' : '#9a9690',
-            border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600,
-            cursor: accepted ? 'pointer' : 'default',
-            transition: 'all .2s', fontFamily: 'inherit'
-          }}>Commencer l'affaire →</button>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <button onClick={() => accepted && setShowIntro(true)} style={{ padding: '11px 20px', background: accepted ? 'rgba(10,122,110,0.1)' : '#f0ede6', color: accepted ? '#0a7a6e' : '#9a9690', border: `1px solid ${accepted ? '#0a7a6e' : 'transparent'}`, borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: accepted ? 'pointer' : 'default', fontFamily: 'inherit' }}>
+            Présentation Lumio →
+          </button>
+          <button onClick={() => accepted && onClose()} style={{ padding: '11px 26px', background: accepted ? '#0B2B2D' : '#d8d2c6', color: accepted ? 'white' : '#9a9690', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: accepted ? 'pointer' : 'default', fontFamily: 'inherit' }}>
+            Commencer →
+          </button>
         </div>
       </div>
     </div>
   );
 }
 
-// ─── ROOT ────────────────────────────────────────────────────
+// ─── ROOT ─────────────────────────────────────────────────────
 function Root() {
-  const [phase, setPhase] = useRootState('loading'); // loading | name | login | brief | desktop
+  const [phase, setPhase] = useRootState('loading');
   const [studentName, setStudentName] = useRootState('');
-  const [showLogin, setShowLogin] = useRootState(false);
+  const [showLock, setShowLock] = useRootState(false);
   const [sessionId, setSessionId] = useRootState(null);
   const [timerStart, setTimerStart] = useRootState(null);
 
-  // Au montage : tenter de restaurer une session existante
+  // ── Restauration session au chargement ─────────────────────
   useRootEffect(() => {
-    const savedId = localStorage.getItem('lumio_sid');
-    if (!savedId) { setPhase('name'); return; }
-    window.LUMIO_SESSION.load(savedId).then(session => {
-      if (!session || !session.studentName) { setPhase('name'); return; }
-      const n = session.studentName;
-      setStudentName(n);
-      setSessionId(savedId);
-      if (session.timerStart) setTimerStart(session.timerStart);
-      window.LUMIO_DATA.student.name = n;
-      if (session.studentEmail) window.LUMIO_DATA.student.email = session.studentEmail;
-      if (window.LUMIO_DATA?.briefEmail?.body) { window.LUMIO_DATA.briefEmail.body = window.LUMIO_DATA.briefEmail.body.replace(/^Lou,/m, `${n.split(' ')[0]},`).replace(/\{\{PRENOM\}\}/g, n.split(' ')[0]); }
-      if (window.LUMIO_DATA.slackMessages?.initial?.[0] && window.LUMIO_DATA.slackMessages.initial[0].text.includes('{{PRENOM}}')) { window.LUMIO_DATA.slackMessages.initial[0].text = window.LUMIO_DATA.slackMessages.initial[0].text.replace('{{PRENOM}}', n.split(' ')[0]); }
-      setPhase('desktop');
-    }).catch(() => { setPhase('name'); });
+    const sid = localStorage.getItem('lumio_reda_bc01_sid');
+    const savedName = localStorage.getItem('lumio_reda_bc01_name');
+    const savedEmail = localStorage.getItem('lumio_reda_bc01_email');
+
+    if (!sid || !savedName) { setPhase('name'); return; }
+
+    // Restauration immédiate depuis localStorage (sans attendre Redis)
+    patchStudent(savedName, savedEmail || '');
+    setStudentName(savedName);
+    setSessionId(sid);
+
+    // Puis vérifier Redis en arrière-plan
+    window.LUMIO_SESSION.load(sid).then(session => {
+      if (session?.timerStart) {
+        setTimerStart(session.timerStart);
+        window.LUMIO_TIMER_START = session.timerStart;
+      }
+      // Restaurer directement sur le desktop, pas sur la landing
+      setShowLock(true);
+      setPhase('lock');
+    }).catch(() => {
+      setShowLock(true);
+      setPhase('lock');
+    });
   }, []);
 
-  const handleNameConfirm = (name, studentEmail) => {
-    const sid = makeSessionId(name + Date.now());
-    localStorage.setItem('lumio_sid', sid);
-    setSessionId(sid);
-    setStudentName(name);
+  const patchStudent = (name, email) => {
     window.LUMIO_DATA.student.name = name;
-    window.LUMIO_DATA.student.email = studentEmail || `${name.split(' ')[0].toLowerCase()}@consult.fr`;
-    if (window.LUMIO_DATA?.briefEmail?.body) { window.LUMIO_DATA.briefEmail.body = window.LUMIO_DATA.briefEmail.body.replace(/^Lou,/m, `${name.split(' ')[0]},`).replace(/\{\{PRENOM\}\}/g, name.split(' ')[0]); }
-    if (window.LUMIO_DATA.slackMessages?.initial?.[0] && window.LUMIO_DATA.slackMessages.initial[0].text.includes('{{PRENOM}}')) { window.LUMIO_DATA.slackMessages.initial[0].text = window.LUMIO_DATA.slackMessages.initial[0].text.replace('{{PRENOM}}', name.split(' ')[0]); }
-    try { window.LUMIO_SESSION.save(sid, { studentName: name, studentEmail: studentEmail || '', phase: 'login' }); } catch(e) {}
-    setShowLogin(true);
-    setPhase('login');
+    window.LUMIO_DATA.student.email = email;
+    window.LUMIO_DATA.student.initial = name[0]?.toUpperCase() || '?';
+    const prenom = name.split(' ')[0];
+    window.LUMIO_DATA.briefEmail.body = window.LUMIO_DATA.briefEmail.body.replace(/^Bonjour,/m, `Bonjour ${prenom},`);
+    window.LUMIO_DATA.camilleEmail.body = window.LUMIO_DATA.camilleEmail.body.replace(/^Bonjour,/m, `Bonjour ${prenom},`);
   };
 
-  const handleLogin = () => {
-    setShowLogin(false);
-    try { window.LUMIO_SESSION.save(sessionId, { phase: 'brief' }); } catch(e) {}
-    setTimeout(() => setPhase('brief'), 200);
+  const handleNameConfirm = (name, email) => {
+    const sid = makeSessionId(name + Date.now());
+    localStorage.setItem('lumio_reda_bc01_sid', sid);
+    localStorage.setItem('lumio_reda_bc01_name', name);
+    localStorage.setItem('lumio_reda_bc01_email', email);
+    setSessionId(sid);
+    setStudentName(name);
+    patchStudent(name, email);
+    window.LUMIO_SESSION.save(sid, { studentName: name, studentEmail: email });
+    setPhase('brief');
+  };
+
+  const handleUnlock = () => {
+    setShowLock(false);
+    if (!window.LUMIO_TIMER_START) window.LUMIO_TIMER_START = Date.now();
+    setPhase('desktop');
   };
 
   const dismissBrief = () => {
     const ts = Date.now();
     setTimerStart(ts);
-    try { window.LUMIO_SESSION.save(sessionId, { phase: 'desktop', timerStart: ts }); } catch(e) {}
     window.LUMIO_TIMER_START = ts;
+    window.LUMIO_SESSION.save(sessionId, { phase: 'desktop', timerStart: ts });
     setPhase('desktop');
   };
 
-  const logout = () => {
-    window.LUMIO_SESSION.save(sessionId, { phase: 'login' });
-    setPhase('login');
-    setShowLogin(true);
-  };
+  const logout = () => { setShowLock(true); setPhase('lock'); };
 
-  const resetSession = () => {
+  window.LUMIO_RESET = () => {
+    localStorage.removeItem('lumio_reda_bc01_sid');
+    localStorage.removeItem('lumio_reda_bc01_name');
+    localStorage.removeItem('lumio_reda_bc01_email');
     if (sessionId) window.LUMIO_SESSION.clear(sessionId);
-    localStorage.removeItem('lumio_sid');
     window.location.reload();
   };
-  // Exposer reset pour un éventuel bouton dans le bureau
-  window.LUMIO_RESET = resetSession;
 
   if (phase === 'loading') return (
-    <div style={{ position: 'fixed', inset: 0, background: '#1a2436', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.15em' }}>RESTAURATION SESSION…</div>
+    <div style={{ position: 'fixed', inset: 0, background: '#0B2B2D', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.15em' }}>CHARGEMENT…</div>
     </div>
   );
 
   return (
     <>
       {phase === 'name' && <NameScreen onConfirm={handleNameConfirm} />}
-      {phase === 'desktop' && <window.LumioDesktop onLogout={logout} studentName={studentName} timerStart={timerStart} />}
+      {(phase === 'desktop' || phase === 'lock') && <window.LumioDesktop onLogout={logout} studentName={studentName} timerStart={timerStart} />}
       {phase === 'brief' && <WelcomeBriefCard onClose={dismissBrief} studentName={studentName} />}
-      {showLogin && phase !== 'name' && <LoginScreen onLogin={handleLogin} studentName={studentName} />}
+      {showLock && phase === 'lock' && <LoginScreen onLogin={handleUnlock} studentName={studentName} />}
     </>
   );
 }
 
-// Mount
 ReactDOM.createRoot(document.getElementById('root')).render(<Root />);
