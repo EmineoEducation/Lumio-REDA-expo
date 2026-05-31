@@ -7,71 +7,66 @@
 <meta name="robots" content="noindex, nofollow"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,300..700;1,300..700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230a7a6e'/><path d='M8 20 L16 10 L24 20' stroke='white' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/><circle cx='16' cy='23' r='2' fill='white'/></svg>"/>
 <style>
 :root {
-  --font-display: 'Newsreader', Georgia, serif;
-  --font-sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  --font-mono: 'IBM Plex Mono', 'SF Mono', Menlo, monospace;
-  --bg: #f4f2ee; --ink: #141824; --ink-soft: #2a3142; --ink-mute: #5b6473; --ink-faint: #9aa0ae;
-  --rule: rgba(20,24,36,0.10); --accent: #0a7a6e;
+  --font-display:'Newsreader',Georgia,serif;
+  --font-sans:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  --font-mono:'IBM Plex Mono','SF Mono',Menlo,monospace;
+  --ink:#141824; --ink-soft:#2a3142; --ink-mute:#5b6473; --ink-faint:#9aa0ae;
+  --rule:rgba(20,24,36,0.10); --accent:#0a7a6e;
 }
-* { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
-body { font-family: var(--font-sans); color: var(--ink); background: #1a2436; -webkit-font-smoothing: antialiased; }
-button { font-family: inherit; } input, textarea { font-family: inherit; }
-*::-webkit-scrollbar { width: 8px; height: 8px; }
-*::-webkit-scrollbar-track { background: transparent; }
-*::-webkit-scrollbar-thumb { background: rgba(20,24,36,0.18); border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
-*::-webkit-scrollbar-thumb:hover { background: rgba(20,24,36,0.32); background-clip: padding-box; border: 2px solid transparent; }
-@keyframes fadeIn    { from{opacity:0} to{opacity:1} }
-@keyframes typedot   { 0%,60%,100%{opacity:.2} 30%{opacity:1} }
-@keyframes spin      { to{transform:rotate(360deg)} }
-@keyframes bounce    { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
-@keyframes shake     { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)} }
-@keyframes slideInNotif { from{opacity:0;transform:translateY(-10px) scale(.96)} to{opacity:1;transform:none} }
-.placeholder-dark::placeholder { color:rgba(255,255,255,0.40) !important; }
-#lumio-api-error { display:none; position:fixed; top:0; left:0; right:0; z-index:99999; background:#c4420f; color:white; padding:8px 20px; font-size:12px; font-family:var(--font-mono); text-align:center; }
-#loading-screen { position:fixed; inset:0; background:#0B2B2D; display:flex; align-items:center; justify-content:center; z-index:99998; }
-#loading-screen span { font-family:'IBM Plex Mono',monospace; font-size:12px; color:rgba(255,255,255,0.3); letter-spacing:0.15em; }
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%;overflow:hidden}
+body{font-family:var(--font-sans);color:var(--ink);background:#1a2436;-webkit-font-smoothing:antialiased}
+button,input,textarea{font-family:inherit}
+*::-webkit-scrollbar{width:8px;height:8px}
+*::-webkit-scrollbar-track{background:transparent}
+*::-webkit-scrollbar-thumb{background:rgba(20,24,36,0.18);border-radius:4px;border:2px solid transparent;background-clip:padding-box}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes typedot{0%,60%,100%{opacity:.2}30%{opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+@keyframes slideInNotif{from{opacity:0;transform:translateY(-10px) scale(.96)}to{opacity:1;transform:none}}
+.placeholder-dark::placeholder{color:rgba(255,255,255,0.40)!important}
+#api-err{display:none;position:fixed;top:0;left:0;right:0;z-index:99999;background:#c4420f;color:white;padding:8px 20px;font-size:12px;font-family:var(--font-mono);text-align:center}
+#splash{position:fixed;inset:0;background:#0B2B2D;display:flex;align-items:center;justify-content:center;z-index:99990}
+#splash span{font-family:var(--font-mono);font-size:12px;color:rgba(255,255,255,0.3);letter-spacing:0.15em}
 </style>
 </head>
 <body>
 
-<div id="lumio-api-error">
+<div id="api-err">
   ⚠ Connexion IA indisponible
-  <button onclick="document.getElementById('lumio-api-error').style.display='none'" style="margin-left:16px;background:rgba(255,255,255,0.25);border:none;color:white;padding:2px 10px;border-radius:4px;cursor:pointer;font-size:11px">✕</button>
+  <button onclick="document.getElementById('api-err').style.display='none'" style="margin-left:12px;background:rgba(255,255,255,0.25);border:none;color:white;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:11px">✕</button>
 </div>
-
-<div id="loading-screen"><span>CHARGEMENT…</span></div>
+<div id="splash"><span>CHARGEMENT…</span></div>
 <div id="root"></div>
 
-<!-- React + Babel -->
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin></script>
-
-<!-- Données -->
 <script src="data.js"></script>
 
 <script>
-/* Proxy API */
+// Proxy API Anthropic → /api/chat
 (function(){
-  const _f = window.fetch.bind(window);
-  window.fetch = function(url, opts={}) {
-    if (typeof url==='string' && url.includes('api.anthropic.com')) {
+  var _f = window.fetch.bind(window);
+  window.fetch = function(url,opts){
+    opts = opts||{};
+    if(typeof url==='string' && url.includes('api.anthropic.com')){
       return _f('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:opts.body})
-        .then(r=>{ if(!r.ok) document.getElementById('lumio-api-error').style.display='block'; return r; })
-        .catch(e=>{ document.getElementById('lumio-api-error').style.display='block'; throw e; });
+        .then(function(r){if(!r.ok)document.getElementById('api-err').style.display='block';return r;})
+        .catch(function(e){document.getElementById('api-err').style.display='block';throw e;});
     }
     return _f(url,opts);
   };
 })();
 
-/* Chargement séquentiel des JSX — garantit l'ordre d'exécution */
 window.LUMIO_APPS = {};
 
-const JSX_FILES = [
+// Chargement séquentiel — chaque fichier attend le précédent
+var FILES = [
   'icons.jsx',
   'app-mail.jsx',
   'app-browser.jsx',
@@ -87,30 +82,28 @@ const JSX_FILES = [
   'main.jsx'
 ];
 
-async function loadSequential(files) {
-  for (const file of files) {
-    await new Promise((resolve, reject) => {
-      fetch(file)
-        .then(r => r.text())
-        .then(src => {
-          try {
-            const compiled = Babel.transform(src, { presets: ['react'] }).code;
-            const fn = new Function('React','ReactDOM', compiled);
-            fn(React, ReactDOM);
-            resolve();
-          } catch(e) {
-            console.error('Babel error in', file, e);
-            resolve(); // continuer même si un fichier échoue
-          }
-        })
-        .catch(e => { console.error('Fetch error', file, e); resolve(); });
-    });
+function loadNext(i) {
+  if (i >= FILES.length) {
+    document.getElementById('splash').style.display = 'none';
+    return;
   }
-  // Tout chargé — cacher le loading screen
-  document.getElementById('loading-screen').style.display = 'none';
+  fetch(FILES[i] + '?v=' + Date.now())
+    .then(function(r){ return r.text(); })
+    .then(function(src){
+      var compiled = Babel.transform(src, {presets:['react']}).code;
+      // Exécuter dans le scope global via script tag — préserve window.*
+      var s = document.createElement('script');
+      s.textContent = compiled;
+      document.head.appendChild(s);
+      loadNext(i + 1);
+    })
+    .catch(function(e){
+      console.error('Erreur chargement', FILES[i], e);
+      loadNext(i + 1);
+    });
 }
 
-loadSequential(JSX_FILES);
+loadNext(0);
 </script>
 
 </body>

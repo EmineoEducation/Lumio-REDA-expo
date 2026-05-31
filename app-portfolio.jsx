@@ -274,3 +274,5 @@ window.__openPortfolio = function() {
     }
   }
 };
+
+window.PortfolioApp = PortfolioApp;
