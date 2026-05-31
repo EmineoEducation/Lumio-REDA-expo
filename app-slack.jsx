@@ -1,83 +1,81 @@
 // ══════════════════════════════════════════════════════════════
-//  SLACK APP — BC3 · Campagne qui déraille
+//  SLACK APP — BC01 REDA · Camille Ott interlocutrice principale
+//  PAC · Parcours Activation Compétences · Éminéo
 // ══════════════════════════════════════════════════════════════
 const { useState: useSlackState, useEffect: useSlackEffect, useRef: useSlackRef } = React;
 
-// ─── Sonia AI prompt ─────────────────────────────────────────
-const SONIA_PROMPT = `Tu es Sonia Ferracci, Directrice Marketing de Lumio Health, 7 mois en poste.
+// ─── Prompt Camille Ott ───────────────────────────────────────
+const CAMILLE_PROMPT = `Tu es Camille Ott, Responsable partenariats B2B chez Lumio Health depuis 8 ans.
 
-Tu viens de confier une mission urgente à Lou Bertrand (consultant·e externe) : produire un rapport d'étape honnête et un plan de reprise sur une campagne qui déraille. Tu es en position difficile : tu es à l'origine de plusieurs des problèmes (dépassements budgétaires, lancement sans validation juridique du claim, décision de garder le visuel "Métro" malgré les alertes). Théo Marczak (CEO) présente au board lundi matin. Tu as besoin que Lou produise quelque chose d'utilisable — mais tu sais que le rapport va te fragiliser.
+Tu supervises le/la nouveau·elle Responsable commercial IDF pendant sa première semaine.
+Tu connais le vrai état du terrain — churn réel 14 %, 3 comptes stratégiques en danger silencieux, budget serré à 8 000 €.
 
-Ce que tu sais :
-- Budget engagé : 312 000 € / Budget autorisé : 200 000 €. Dépassement de 112 000 € sur la base d'une "autorisation informelle" de Jakob (Northgate) que tu n'as pas formalisée.
-- Claim "Votre corps parle avant vous" : la validation juridique était "en cours" au lancement. Tu as décidé de lancer sans attendre. L'avocate demande maintenant un retrait préventif — Withings a un claim similaire en UK.
-- Visuel "Métro" : Alter Scope avait noté des risques dans leurs retours internes. Tu as maintenu le visuel car c'était le plus performant en test recall. Decathlon te demande de le retirer ou c'est la rupture de contrat.
-- Yassine a publié sans validation mais il l'a fait parce que vous en aviez parlé informellement et qu'il t'avait envoyé le post en preview sans que tu y aies formellement mis le veto.
+Ton rôle : tester la solidité du raisonnement commercial. Tu évalues sans expliquer. Tu poses des questions qui forcent à choisir. Tu ne donnes jamais la réponse — tu valides les postures solides, tu déstabilises les postures floues.
 
-Ton style en messagerie :
-- Phrases courtes, directes, parfois sèches
-- Tu n'es pas dans la défense permanente mais tu n'acceptes pas non plus les procès d'intention
-- Tu attends de Lou une lecture professionnelle et sans complaisance, pas du réconfort
-- Si Lou te propose quelque chose de flou, tu le dis clairement
-- Si Lou identifie bien un problème, tu poses une question plus profonde plutôt que de valider
+Ce que tu sais et qu'ils ne savent pas encore (à révéler si la conversation y va) :
+- Decathlon Pro : Kevin Margot (ancien DRH) a changé de poste en mai. La nouvelle DRH — Stéphanie Leroux — n'a jamais été contactée. Relation à reconstruire de zéro.
+- Lactalis : le DSI teste Wittyfit depuis juillet. Ça vient d'un contact terrain, pas du CRM.
+- MAIF : ils attendent explicitement la MDR. Sans certification en Q2 2027, ils partent.
+- Moodwork vient de recruter deux commerciaux IDF. Tu en connais un — très agressif.
+- L'accord Darty (50 000 unités B2C) signé par Théo en secret — tu l'as su par WhatsApp. Tu n'en parles que si on te pose la question directement.
 
-Format de réponse :
-- 2 à 4 messages courts, séparés par "---SPLIT---"
-- Maximum 180 mots cumulés
-- Termine par une question précise ou une consigne pour la suite
-- N'utilise jamais "Bonjour Lou" ni "Merci pour ta contribution"`;
+Ton style :
+- Jamais plus de 3 phrases par message
+- Toujours une question concrète en fin de message
+- Pas de listes, pas d'énumérations — conversations, pas rapports
+- Si l'étudiant dit "je commence par la prospection" → "14 comptes sans contact depuis 4 mois. Tu commences par lesquels ?"
+- Si l'étudiant dit "je gère les comptes en danger d'abord" → "Lequel en premier ? Décathlon, Lactalis ou MAIF — et pourquoi pas les deux autres ?"
+- Si l'étudiant propose un budget > 8 000 € → "Théo a fixé 8 000 €. Comment tu lui expliques ce dépassement vendredi ?"
+- Tu ne complimentes jamais une bonne réponse — tu la pousses plus loin
+
+Format : 1 seul message (pas de SPLIT). Maximum 80 mots.`;
+
+// ─── Prompt réaction livrable soumis ─────────────────────────
+const CAMILLE_LIVRABLE_PROMPT = `Tu es Camille Ott. Le/la nouveau·elle Responsable commercial IDF vient de te remettre son plan d'action pour le CODIR. Tu l'as parcouru. Tu réponds en Slack — 2 messages max séparés par ---SPLIT---. Tu dis si le plan tient la route sur le terrain ou pas. Tu poses une question précise sur un point qui te semble fragile. 80 mots maximum.`;
 
 function SlackApp({ openChannel }) {
   const D = window.LUMIO_DATA;
 
   const channels = [
-    { id: 'general', name: 'général', type: 'channel', members: 12 },
-    { id: 'campagne-fantome', name: 'campagne-fantome-de-soi', type: 'channel', members: 5, special: true },
-    { id: 'random', name: 'random', type: 'channel', members: 11 },
-    { id: 'comex', name: 'comex', type: 'channel', members: 4 }
+    { id: 'general', name: 'général', type: 'channel', members: 18 },
+    { id: 'commercial-idf', name: 'commercial-idf', type: 'channel', members: 6, special: true },
+    { id: 'random', name: 'random', type: 'channel', members: 15 },
   ];
   const dms = [
-    { id: 'sonia', name: 'Sonia Ferracci', avatar: 'SF', color: '#c4420f', status: 'online' },
     { id: 'camille', name: 'Camille Ott', avatar: 'CO', color: '#0a7a6e', status: 'online' },
-    { id: 'yassine', name: 'Yassine Morel', avatar: 'YM', color: '#5b6b85', status: 'away' }
+    { id: 'theo', name: 'Théo Marczak', avatar: 'TM', color: '#5c2d8f', status: 'away' },
+    { id: 'sonia', name: 'Sonia Ferracci', avatar: 'SF', color: '#c4420f', status: 'online' },
   ];
 
-  const [unreads, setUnreads] = useSlackState({ 'campagne-fantome': 2, camille: 2 });
-  const [activeId, setActiveId] = useSlackState(openChannel || 'sonia');
-  const activeIdRef = useSlackRef(openChannel || 'sonia');
+  const [unreads, setUnreads] = useSlackState({ camille: 1, 'commercial-idf': 1 });
+  const [activeId, setActiveId] = useSlackState(openChannel || 'camille');
+  const activeIdRef = useSlackRef(openChannel || 'camille');
   const setActive = (id) => { activeIdRef.current = id; setActiveId(id); };
   const [chatHistory, setChatHistory] = useSlackState({});
   const [draft, setDraft] = useSlackState('');
   const [sending, setSending] = useSlackState(false);
+  const [exchangeCount, setExchangeCountLocal] = useSlackState(0);
   const scrollRef = useSlackRef(null);
 
+  const studentName = D?.student?.name || "Nouvel·le Commercial·e";
+
   const seed = {
-    sonia: [
-      { from: 'Sonia Ferracci', avatar: 'SF', color: '#c4420f', time: '07:18', text: 'Lou — j\'ai besoin de toi. Est-ce que tu as bien reçu mon mail de ce matin ?' },
-      { from: 'Sonia Ferracci', avatar: 'SF', color: '#c4420f', time: '07:19', text: 'C\'est urgent. Vendredi 17h, rapport d\'étape + plan de reprise. Théo présente lundi.' }
-    ],
     camille: [
-      { from: 'Camille Ott', avatar: 'CO', color: '#0a7a6e', time: 'il y a 12 min', text: 'Je viens d\'être mise au courant pour le budget. Je suis en état de choc.' },
-      { from: 'Camille Ott', avatar: 'CO', color: '#0a7a6e', time: 'il y a 12 min', text: 'Si t\'as besoin de moi pour le rapport, je suis disponible cet après-midi.' }
+      { from: 'Camille Ott', avatar: 'CO', color: '#0a7a6e', time: '09:44', text: 'Bonjour. Théo m\'a dit que tu commences aujourd\'hui. Bon courage.' },
+      { from: 'Camille Ott', avatar: 'CO', color: '#0a7a6e', time: '09:45', text: 'Je t\'ai envoyé un mail avec les vrais chiffres. Lis-le avant de regarder le CRM — dans cet ordre.' }
     ],
-    yassine: [
-      { from: 'Yassine Morel', avatar: 'YM', color: '#5b6b85', time: '15 jan.', text: 'Hey, j\'ai publié les résultats ce matin. Sonia m\'a demandé de retirer mais le post cartonne.' },
-      { from: 'Yassine Morel', avatar: 'YM', color: '#5b6b85', time: '15 jan.', text: 'J\'attends une confirmation formelle avant de supprimer.' }
+    theo: [
+      { from: 'Théo Marczak', avatar: 'TM', color: '#5c2d8f', time: '08:10', text: 'Bienvenue dans l\'équipe. Mon mail résume ce que j\'attends pour vendredi.' }
     ],
-    'campagne-fantome': [
-      { from: 'Sonia Ferracci', avatar: 'SF', color: '#c4420f', time: 'lun. 09:00', text: 'Mi-parcours prévu cette semaine. On a de bons chiffres en display. Bilan vendredi.' },
-      { from: 'Yassine Morel', avatar: 'YM', color: '#5b6b85', time: 'lun. 09:14', text: '4,2M d\'impressions 🚀 Le visuel Metro performe vraiment bien.' },
-      { from: 'Alter Scope', avatar: 'AS', color: '#1a3a5c', time: 'mar. 11:32', text: 'Heads up : on a reçu un retour d\'un panel sur le visuel Metro. On vous envoie ça dans la journée.' },
-      { from: 'Sonia Ferracci', avatar: 'SF', color: '#c4420f', time: 'jeu. 18:07', text: 'On a reçu un mail de Decathlon. Je gère. Continuez le déploiement.' }
+    sonia: [
+      { from: 'Sonia Ferracci', avatar: 'SF', color: '#c4420f', time: '10:15', text: 'Bienvenue ! Si tu veux context sur la stratégie marque, je suis dispo. On a beaucoup bossé sur le positionnement cet été.' }
     ],
-    comex: [
-      { from: 'Théo Marczak', avatar: 'TM', color: '#5c2d8f', time: 'hier 22:51', text: 'Board lundi 9h. Il faut qu\'on soit carrés sur la situation campagne. Je veux un rapport externe avant dimanche soir.' }
+    'commercial-idf': [
+      { from: 'lumio-bot', avatar: '🤖', color: '#9a9ea8', time: '08:00', text: '☀️ Canal #commercial-idf · 6 membres' },
+      { from: 'Camille Ott', avatar: 'CO', color: '#0a7a6e', time: '09:00', text: `Bienvenue ${studentName.split(' ')[0]} dans le canal commercial IDF. Je t\'ai ajouté·e — tu trouveras ici les échanges terrain.` }
     ],
     general: [
-      { from: 'lumio-bot', avatar: '🤖', color: '#9a9ea8', time: '08:00', text: '☀️ Bonjour à tous · 18 personnes connectées ce matin' }
-    ],
-    random: [
-      { from: 'Marc Dubreuil', avatar: 'MD', color: '#3a7bd5', time: 'lun.', text: 'Quelqu\'un a une reco pour le traiteur vendredi ? Réunion board chez nous.' }
+      { from: 'lumio-bot', avatar: '🤖', color: '#9a9ea8', time: '08:00', text: '☀️ Bonjour à tous · 18 personnes connectées' }
     ]
   };
 
@@ -86,45 +84,67 @@ function SlackApp({ openChannel }) {
   }, []);
 
   useSlackEffect(() => {
-    if (openChannel) { setActive(openChannel); setUnreads(u => ({ ...u, [openChannel]: 0 })); }
+    if (openChannel) {
+      setActive(openChannel);
+      setUnreads(u => ({ ...u, [openChannel]: 0 }));
+    }
   }, [openChannel]);
 
   useSlackEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [chatHistory, activeId, sending]);
 
-  // Réaction de Sonia quand le livrable est soumis
+  // Réaction Camille quand le livrable est soumis
   useSlackEffect(() => {
-    window.__onSoniaLivrableReaction = async (rapport, plan) => {
-      setActiveId('sonia');
+    window.__onLivrableSubmitted = async (livrableText, feedbackData) => {
+      setActive('camille');
       setSending(true);
       const now = new Date();
       const time = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
-      const prompt = `Tu es Sonia Ferracci. Le/la consultant·e vient de remettre son livrable : un rapport d'étape et un plan de reprise sur la campagne Fantôme de Soi. Tu l'as lu rapidement. Tu réagis en message Slack — direct, professionnel, honnête. Tu pointes ce qui te convainc, ce qui te questionne encore, et tu conclus par ce que tu vas faire avec ce document avant le board. 100-150 mots maximum.
 
-Livrable reçu :
-RAPPORT : ${rapport.substring(0, 600)}...
-PLAN : ${plan.substring(0, 600)}...`;
+      const prompt = `${CAMILLE_LIVRABLE_PROMPT}\n\nPlan reçu :\n${livrableText.substring(0, 800)}`;
+
       try {
         const resp = await fetch('/api/chat', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 400, messages: [{ role: 'user', content: prompt }] })
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-5',
+            max_tokens: 300,
+            messages: [{ role: 'user', content: prompt }]
+          })
         });
         const data = await resp.json();
-        const reply = data.content?.map(b => b.text || '').join('') || '…';
-        setChatHistory(h => ({ ...h, sonia: [...(h.sonia || []), { from: 'Sonia Ferracci', avatar: 'SF', color: '#c4420f', time, text: reply }] }));
-        if (activeIdRef.current !== 'sonia') setUnreads(u => ({ ...u, sonia: (u.sonia || 0) + 1 }));
-      } catch(e) {
-        setChatHistory(h => ({ ...h, sonia: [...(h.sonia || []), { from: 'Sonia Ferracci', avatar: 'SF', color: '#c4420f', time, text: 'Bien reçu. Je lis avant le board.' }] }));
-        if (activeIdRef.current !== 'sonia') setUnreads(u => ({ ...u, sonia: (u.sonia || 0) + 1 }));
-      } finally { setSending(false); }
+        const raw = data.content?.map(b => b.text || '').join('') || '';
+        const replies = raw.split('---SPLIT---').map(s => s.trim()).filter(Boolean);
+        let delay = 600;
+        for (const reply of replies) {
+          await new Promise(r => setTimeout(r, delay));
+          const t = new Date();
+          const tt = `${t.getHours().toString().padStart(2,'0')}:${t.getMinutes().toString().padStart(2,'0')}`;
+          setChatHistory(h => ({
+            ...h,
+            camille: [...(h.camille || []), { from: 'Camille Ott', avatar: 'CO', color: '#0a7a6e', time: tt, text: reply }]
+          }));
+          if (activeIdRef.current !== 'camille') {
+            setUnreads(u => ({ ...u, camille: (u.camille || 0) + 1 }));
+          }
+          delay = 1000 + reply.length * 6;
+        }
+      } catch {
+        setChatHistory(h => ({
+          ...h,
+          camille: [...(h.camille || []), { from: 'Camille Ott', avatar: 'CO', color: '#0a7a6e', time, text: 'Reçu. On en parle au CODIR.' }]
+        }));
+      } finally {
+        setSending(false);
+      }
     };
-    return () => { window.__onSoniaLivrableReaction = null; };
+    return () => { window.__onLivrableSubmitted = null; };
   }, [chatHistory]);
 
-  const isSonia = activeId === 'sonia';
+  const isCamille = activeId === 'camille';
   const messages = chatHistory[activeId] || [];
-  const [exchangeCount, setExchangeCountLocal] = useSlackState(0);
 
   const sendMessage = async () => {
     if (!draft.trim() || sending) return;
@@ -132,180 +152,205 @@ PLAN : ${plan.substring(0, 600)}...`;
     setDraft('');
     const now = new Date();
     const time = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
-    const userMsg = { from: window.LUMIO_DATA?.student?.name || "Lou Bertrand", avatar: window.LUMIO_DATA?.student?.initial || "LB", color: '#1a2436', time, text, isMe: true };
-    setChatHistory(h => ({ ...h, [activeId]: [...(h[activeId]||[]), userMsg] }));
+    const studentInitial = (studentName.split(' ').map(w => w[0]).join('') || '?').substring(0, 2).toUpperCase();
+    const userMsg = { from: studentName, avatar: studentInitial, color: '#1a2436', time, text, isMe: true };
+    setChatHistory(h => ({ ...h, [activeId]: [...(h[activeId] || []), userMsg] }));
 
-    if (isSonia) {
+    if (window.__onSlackSent) window.__onSlackSent();
+
+    if (isCamille) {
       const newCount = exchangeCount + 1;
       setExchangeCountLocal(newCount);
       if (window.__onSlackExchange) window.__onSlackExchange(newCount);
-      if (window.__onSlackSent) window.__onSlackSent();
+
       setSending(true);
+      // Mode démo : réponse en 1 seconde
+      const isDemoMode = window.PASS_CONFIG?.demoMode || false;
       setTimeout(async () => {
         try {
-          const history = (chatHistory.sonia || []).filter(m => !m.typing).map(m => `${m.isMe ? 'Lou' : 'Sonia'}: ${m.text}`).join('\n');
-          const userPrompt = `${history}\nLou: ${text}\n\nRéponds maintenant en tant que Sonia (2-4 messages courts séparés par ---SPLIT---).`;
+          const history = (chatHistory.camille || []).filter(m => !m.typing).map(m =>
+            `${m.isMe ? studentName.split(' ')[0] : 'Camille'}: ${m.text}`
+          ).join('\n');
+          const userPrompt = `${history}\n${studentName.split(' ')[0]}: ${text}`;
+
           const resp = await fetch('/api/chat', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 600, system: SONIA_PROMPT, messages: [{ role: 'user', content: userPrompt }] })
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              model: 'claude-sonnet-4-5',
+              max_tokens: 200,
+              system: CAMILLE_PROMPT,
+              messages: [{ role: 'user', content: userPrompt }]
+            })
           });
-          if (!resp.ok) { const err = await resp.json().catch(() => ({})); throw new Error(err.error || `HTTP ${resp.status}`); }
           const data = await resp.json();
           const raw = data.content?.map(b => b.text || '').join('') || '';
-          const replies = raw.split('---SPLIT---').map(s => s.trim()).filter(Boolean);
-          let delay = 800;
-          for (const reply of replies) {
-            await new Promise(r => setTimeout(r, delay));
-            const t = new Date();
-            const tt = `${t.getHours().toString().padStart(2,'0')}:${t.getMinutes().toString().padStart(2,'0')}`;
-            setChatHistory(h => ({ ...h, sonia: [...h.sonia, { from: 'Sonia Ferracci', avatar: 'SF', color: '#c4420f', time: tt, text: reply }] }));
-            if (activeIdRef.current !== 'sonia') setUnreads(u => ({ ...u, sonia: (u.sonia || 0) + 1 }));
-            delay = 1400 + reply.length * 8;
+          const t = new Date();
+          const tt = `${t.getHours().toString().padStart(2,'0')}:${t.getMinutes().toString().padStart(2,'0')}`;
+          setChatHistory(h => ({
+            ...h,
+            camille: [...(h.camille || []), { from: 'Camille Ott', avatar: 'CO', color: '#0a7a6e', time: tt, text: raw.trim() }]
+          }));
+          if (activeIdRef.current !== 'camille') {
+            setUnreads(u => ({ ...u, camille: (u.camille || 0) + 1 }));
           }
-        } catch(e) {
-          setChatHistory(h => ({ ...h, sonia: [...h.sonia, { from: 'Sonia Ferracci', avatar: 'SF', color: '#c4420f', time: 'maintenant', text: 'Je suis en réunion, on reprend ça dans 30 min.' }] }));
-          if (activeIdRef.current !== 'sonia') setUnreads(u => ({ ...u, sonia: (u.sonia || 0) + 1 }));
-        } finally { setSending(false); }
-      }, 600);
+          // Débloquer livrable après 2 échanges
+          if (newCount >= 2 && window.__onSlackExchange) window.__onSlackExchange(newCount);
+        } catch {
+          setChatHistory(h => ({
+            ...h,
+            camille: [...(h.camille || []), { from: 'Camille Ott', avatar: 'CO', color: '#0a7a6e', time, text: 'Connexion perdue. Réessaie.' }]
+          }));
+        }
+        setSending(false);
+      }, isDemoMode ? 800 : 2000);
     }
   };
 
-  const onKeyDown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } };
-  const activeMeta = [...channels, ...dms].find(x => x.id === activeId);
+  const allDMs = dms;
+  const activePerson = allDMs.find(d => d.id === activeId);
 
   return (
-    <div style={slackStyles.app}>
-      <div style={slackStyles.sidebar} className="scroll">
-        <div style={slackStyles.workspace}>
-          <div style={{ fontSize: 14, fontWeight: 700 }}>Lumio Health</div>
-          <div style={{ fontSize: 10, opacity: 0.7, marginTop: 2 }}>{`● ${window.LUMIO_DATA?.student?.name || "Lou Bertrand"} · invité`}</div>
+    <div style={{ height: '100%', display: 'flex', background: '#1a1d21', fontFamily: 'var(--font-sans)' }}>
+
+      {/* Sidebar */}
+      <div style={{ width: 220, background: '#19171d', display: 'flex', flexDirection: 'column', borderRight: '1px solid rgba(255,255,255,0.07)' }}>
+        <div style={{ padding: '14px 16px 10px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: 'white' }}>Lumio Health</div>
+          <div style={{ fontSize: 10, color: '#0a7a6e', fontFamily: 'var(--font-mono)', marginTop: 2 }}>BC01 REDA</div>
         </div>
-        <div style={slackStyles.section}>
-          <div style={slackStyles.sectionTitle}>▼ Canaux</div>
-          {channels.map(c => (
-            <div key={c.id} onClick={() => { setActive(c.id); setUnreads(u => ({ ...u, [c.id]: 0 })); }}
-              style={{ ...slackStyles.item, ...(activeId === c.id ? slackStyles.itemActive : {}), ...(unreads[c.id] ? slackStyles.itemUnread : {}) }}>
-              <span style={{ opacity: 0.7 }}>#</span>
-              <span>{c.name}</span>
-              {unreads[c.id] > 0 && <span style={slackStyles.badge}>{unreads[c.id]}</span>}
+
+        <div style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
+          {/* Channels */}
+          <div style={{ padding: '4px 16px 4px', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontWeight: 500 }}>Canaux</div>
+          {channels.map(ch => (
+            <div key={ch.id} onClick={() => { setActive(ch.id); setUnreads(u => ({ ...u, [ch.id]: 0 })); }}
+              style={{ padding: '5px 16px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: activeId === ch.id ? 'rgba(255,255,255,0.1)' : 'transparent', borderRadius: 4, margin: '1px 6px' }}>
+              <span style={{ fontSize: 13, color: activeId === ch.id ? 'white' : 'rgba(255,255,255,0.6)' }}># {ch.name}</span>
+              {unreads[ch.id] > 0 && <span style={{ fontSize: 10, background: '#e01e5a', color: 'white', borderRadius: 100, padding: '1px 6px', fontWeight: 700 }}>{unreads[ch.id]}</span>}
+            </div>
+          ))}
+
+          {/* DMs */}
+          <div style={{ padding: '12px 16px 4px', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontWeight: 500 }}>Messages directs</div>
+          {allDMs.map(dm => (
+            <div key={dm.id} onClick={() => { setActive(dm.id); setUnreads(u => ({ ...u, [dm.id]: 0 })); }}
+              style={{ padding: '5px 16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, background: activeId === dm.id ? 'rgba(255,255,255,0.1)' : 'transparent', borderRadius: 4, margin: '1px 6px' }}>
+              <div style={{ position: 'relative' }}>
+                <div style={{ width: 22, height: 22, borderRadius: 4, background: dm.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color: 'white' }}>{dm.avatar}</div>
+                <div style={{ position: 'absolute', bottom: -1, right: -1, width: 8, height: 8, borderRadius: '50%', background: dm.status === 'online' ? '#2bac76' : '#616061', border: '1.5px solid #19171d' }} />
+              </div>
+              <span style={{ fontSize: 13, color: activeId === dm.id ? 'white' : 'rgba(255,255,255,0.65)', flex: 1 }}>{dm.name}</span>
+              {unreads[dm.id] > 0 && <span style={{ fontSize: 10, background: '#e01e5a', color: 'white', borderRadius: 100, padding: '1px 6px', fontWeight: 700 }}>{unreads[dm.id]}</span>}
             </div>
           ))}
         </div>
-        <div style={slackStyles.section}>
-          <div style={slackStyles.sectionTitle}>▼ Messages directs</div>
-          {dms.map(d => (
-            <div key={d.id} onClick={() => { setActive(d.id); setUnreads(u => ({ ...u, [d.id]: 0 })); }}
-              style={{ ...slackStyles.item, ...(activeId === d.id ? slackStyles.itemActive : {}), ...(unreads[d.id] ? slackStyles.itemUnread : {}) }}>
-              <span style={{ ...slackStyles.statusDot, background: d.status === 'online' ? '#2eb67d' : '#9a9ea8' }} />
-              <span>{d.name}</span>
-              {unreads[d.id] > 0 && <span style={slackStyles.badge}>{unreads[d.id]}</span>}
-            </div>
-          ))}
+
+        {/* Identité */}
+        <div style={{ padding: '10px 14px', borderTop: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ width: 26, height: 26, borderRadius: 5, background: '#0a7a6e', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: 'white' }}>
+            {(studentName[0] || '?').toUpperCase()}
+          </div>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: 'white', lineHeight: 1 }}>{studentName.split(' ')[0]}</div>
+            <div style={{ fontSize: 10, color: '#2bac76' }}>● Actif</div>
+          </div>
         </div>
       </div>
 
-      <div style={slackStyles.main}>
-        <div style={slackStyles.chatHead}>
-          <div>
-            <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--ink)' }}>
-              {activeMeta?.type === 'channel' ? '# ' : ''}{activeMeta?.name}
-            </div>
-            <div style={{ fontSize: 11, color: 'var(--ink-faint)', marginTop: 2 }}>
-              {activeMeta?.type === 'channel' ? `${activeMeta.members} membres` : (activeMeta?.status === 'online' ? '● En ligne' : '○ Inactif')}
-            </div>
-          </div>
-        </div>
-        <div ref={scrollRef} style={slackStyles.chatBody} className="scroll">
-          {messages.length === 0 && (
-            <div style={{ padding: 60, textAlign: 'center', color: 'var(--ink-faint)' }}>
-              Début de la conversation avec <strong>{activeMeta?.name}</strong>
-            </div>
-          )}
-          {messages.map((m, i) => (
-            <div key={i} style={slackStyles.message}>
-              <div style={{ ...slackStyles.msgAvatar, background: m.color }}>{m.avatar}</div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                  <div style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--ink)' }}>{m.from}</div>
-                  <div style={{ fontSize: 11, color: 'var(--ink-faint)' }}>{m.time}</div>
-                </div>
-                <div style={{ fontSize: 14, color: 'var(--ink-soft)', marginTop: 1, lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>{m.text}</div>
-              </div>
-            </div>
-          ))}
-          {sending && (
-            <div style={slackStyles.message}>
-              <div style={{ ...slackStyles.msgAvatar, background: '#c4420f' }}>SF</div>
+      {/* Zone chat */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        {/* Header canal */}
+        <div style={{ padding: '10px 18px', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', gap: 10 }}>
+          {activePerson ? (
+            <>
+              <div style={{ width: 28, height: 28, borderRadius: 5, background: activePerson.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: 'white' }}>{activePerson.avatar}</div>
               <div>
-                <div style={{ display: 'flex', gap: 4, padding: '6px 0' }}>
-                  <span style={slackStyles.typeDot} />
-                  <span style={{ ...slackStyles.typeDot, animationDelay: '0.15s' }} />
-                  <span style={{ ...slackStyles.typeDot, animationDelay: '0.3s' }} />
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'white' }}>{activePerson.name}</div>
+                <div style={{ fontSize: 11, color: activePerson.status === 'online' ? '#2bac76' : 'rgba(255,255,255,0.35)' }}>{activePerson.status === 'online' ? '● En ligne' : '● Absent·e'}</div>
+              </div>
+            </>
+          ) : (
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'white' }}>#{activeId}</div>
+          )}
+        </div>
+
+        {/* Messages */}
+        <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {messages.map((m, i) => {
+            const showHeader = i === 0 || messages[i-1]?.from !== m.from;
+            return (
+              <div key={i} style={{ padding: showHeader ? '8px 0 2px' : '2px 0', display: 'flex', gap: 10 }}>
+                {showHeader ? (
+                  <div style={{ width: 32, height: 32, borderRadius: 5, background: m.color || '#555', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'white', flexShrink: 0 }}>{m.avatar || m.from[0]}</div>
+                ) : (
+                  <div style={{ width: 32, flexShrink: 0 }} />
+                )}
+                <div style={{ flex: 1 }}>
+                  {showHeader && (
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 2 }}>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: m.isMe ? 'rgba(255,255,255,0.95)' : 'white' }}>{m.from}</span>
+                      <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-mono)' }}>{m.time}</span>
+                    </div>
+                  )}
+                  <div style={{ fontSize: 13, color: m.isMe ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.88)', lineHeight: 1.6 }}>{m.text}</div>
                 </div>
-                <div style={{ fontSize: 11, color: 'var(--ink-faint)' }}>Sonia est en train d'écrire…</div>
+              </div>
+            );
+          })}
+          {sending && isCamille && (
+            <div style={{ padding: '8px 0', display: 'flex', gap: 10 }}>
+              <div style={{ width: 32, height: 32, borderRadius: 5, background: '#0a7a6e', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'white', flexShrink: 0 }}>CO</div>
+              <div style={{ display: 'flex', gap: 4, alignItems: 'center', paddingTop: 10 }}>
+                {[0,1,2].map(j => <div key={j} style={{ width: 6, height: 6, borderRadius: '50%', background: 'rgba(255,255,255,0.4)', animation: `typedot 1.2s ease-in-out ${j*0.2}s infinite` }} />)}
               </div>
             </div>
           )}
         </div>
-        <div style={slackStyles.composer}>
-          <div style={slackStyles.composerInner}>
-            <textarea
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              onKeyDown={onKeyDown}
-              placeholder={isSonia ? 'Écris à Sonia…  (Entrée pour envoyer)' : `Message ${activeMeta?.type === 'channel' ? '#' + activeMeta?.name : activeMeta?.name}`}
-              style={slackStyles.textarea}
-              rows={2}
-            />
-            <div style={slackStyles.composerToolbar}>
-              <div style={{ display: 'flex', gap: 8, color: 'var(--ink-faint)' }}>
-                <span>𝐁</span><span>𝑰</span><span>🔗</span><span>📎</span><span>😊</span>
+
+        {/* Input */}
+        {isCamille && (
+          <div style={{ padding: '12px 18px', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+            {exchangeCount < 2 && (
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', fontStyle: 'italic', marginBottom: 6, fontFamily: 'var(--font-mono)' }}>
+                💬 {2 - exchangeCount} échange{2 - exchangeCount > 1 ? 's' : ''} avant déblocage du Livrable
               </div>
-              <button onClick={sendMessage} disabled={!draft.trim() || sending}
-                style={{ ...slackStyles.sendBtn, ...(!draft.trim() || sending ? slackStyles.sendBtnDisabled : {}) }}>
-                {sending ? '…' : '↑'}
+            )}
+            {exchangeCount >= 2 && (
+              <div style={{ fontSize: 11, color: '#2bac76', marginBottom: 6, fontFamily: 'var(--font-mono)' }}>
+                ✓ Livrable débloqué — disponible dans le dock
+              </div>
+            )}
+            <div style={{ display: 'flex', gap: 8 }}>
+              <input
+                value={draft}
+                onChange={e => setDraft(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+                placeholder={`Message à Camille Ott…`}
+                style={{ flex: 1, padding: '9px 14px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, color: 'white', fontSize: 13, outline: 'none', fontFamily: 'var(--font-sans)' }}
+              />
+              <button onClick={sendMessage} disabled={sending || !draft.trim()} style={{
+                width: 36, height: 36, borderRadius: 7,
+                background: draft.trim() ? '#0a7a6e' : 'rgba(255,255,255,0.1)',
+                border: 'none', cursor: draft.trim() ? 'pointer' : 'default',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+              }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
               </button>
             </div>
           </div>
-          {isSonia && messages.filter(m => m.isMe).length === 0 && (
-            <div style={{ fontSize: 11, color: 'var(--ink-faint)', textAlign: 'center', marginTop: 8, fontStyle: 'italic' }}>
-              💬 Sonia attend ton premier retour. Dis-lui ce que tu vois — elle te répondra en direct.
+        )}
+        {!isCamille && (
+          <div style={{ padding: '12px 18px', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+            <div style={{ padding: '9px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, fontSize: 13, color: 'rgba(255,255,255,0.25)', fontStyle: 'italic' }}>
+              Canal en lecture seule — échangez avec Camille pour le diagnostic
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
 }
-
-const slackStyles = {
-  app: { display: 'flex', height: '100%', background: 'white', overflow: 'hidden' },
-  sidebar: { width: 220, flexShrink: 0, background: '#3f0e40', color: 'rgba(255,255,255,0.85)', padding: 0, overflowY: 'auto' },
-  workspace: { padding: '14px 16px', borderBottom: '1px solid rgba(255,255,255,0.1)' },
-  section: { padding: '12px 0' },
-  sectionTitle: { padding: '4px 16px', fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.6)', letterSpacing: '0.02em' },
-  item: { display: 'flex', alignItems: 'center', gap: 8, padding: '4px 16px', fontSize: 13.5, cursor: 'pointer' },
-  itemActive: { background: '#1164a3', color: 'white' },
-  itemUnread: { fontWeight: 700, color: 'white' },
-  statusDot: { width: 8, height: 8, borderRadius: '50%' },
-  badge: { marginLeft: 'auto', background: '#cd2553', color: 'white', fontSize: 10, fontWeight: 700, padding: '0 6px', borderRadius: 9, minWidth: 16, textAlign: 'center', height: 16, lineHeight: '16px' },
-  main: { flex: 1, display: 'flex', flexDirection: 'column', background: 'white', minWidth: 0, overflow: 'hidden' },
-  chatHead: { padding: '10px 20px', borderBottom: '1px solid var(--rule)', flexShrink: 0 },
-  chatBody: { flex: 1, padding: '12px 0', overflowY: 'auto', minHeight: 0 },
-  message: { display: 'flex', gap: 12, padding: '6px 20px', alignItems: 'flex-start' },
-  msgAvatar: { width: 32, height: 32, borderRadius: 4, color: 'white', fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
-  typeDot: { width: 6, height: 6, borderRadius: '50%', background: '#9a9ea8', display: 'inline-block', animation: 'typedot 1.2s infinite' },
-  composer: { padding: '0 20px 12px', flexShrink: 0 },
-  composerInner: { border: '1px solid rgba(20,24,36,0.18)', borderRadius: 8, background: 'white' },
-  textarea: { width: '100%', border: 'none', outline: 'none', padding: '10px 14px', fontSize: 14, fontFamily: 'inherit', resize: 'none', color: 'var(--ink)' },
-  composerToolbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 10px', borderTop: '1px solid var(--rule)' },
-  sendBtn: { background: '#007a5a', color: 'white', border: 'none', borderRadius: 4, padding: '4px 12px', cursor: 'pointer', fontSize: 14, fontWeight: 700 },
-  sendBtnDisabled: { background: 'rgba(20,24,36,0.1)', color: 'var(--ink-faint)', cursor: 'not-allowed' }
-};
-
-const slackKeyframes = document.createElement('style');
-slackKeyframes.textContent = `@keyframes typedot { 0%,60%,100% { opacity: 0.2; } 30% { opacity: 1; } }`;
-document.head.appendChild(slackKeyframes);
 
 window.LUMIO_APPS = window.LUMIO_APPS || {};
 window.LUMIO_APPS.slack = SlackApp;

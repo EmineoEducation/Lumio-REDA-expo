@@ -1,175 +1,74 @@
-// ══════════════════════════════════════════════════════════════
-//  VOICE MEMOS — Camille's verbatims
-// ══════════════════════════════════════════════════════════════
-const { useState: useVoiceState, useEffect: useVoiceEffect, useRef: useVoiceRef } = React;
+// VOICE MEMO — BC01 REDA v3
+function VoiceApp(){
+  var D=window.LUMIO_DATA||{};
+  var transcription=D.memoVocal?.transcription??'Transcription non disponible.';
+  var [playing,setPlaying]=React.useState(false);
+  var [progress,setProgress]=React.useState(0);
+  var ref=React.useRef(null);
+  var DURATION=134;
 
-function VoiceApp() {
-  const D = window.LUMIO_DATA;
-  const memos = D.camilleVerbatims.map((v, i) => ({
-    ...v,
-    id: `cam-${i}`,
-    label: v.title,
-    date: ['7 juill. 2026', '7 juill. 2026', '7 juill. 2026'][i],
-    durationSec: [102, 58, 75][i]
-  }));
-
-  const [selectedId, setSelectedId] = useVoiceState(memos[0].id);
-  const [playing, setPlaying] = useVoiceState(false);
-  const [position, setPosition] = useVoiceState(0); // seconds
-  const selected = memos.find(m => m.id === selectedId);
-  const intervalRef = useVoiceRef(null);
-
-  useVoiceEffect(() => {
-    if (playing) {
-      intervalRef.current = setInterval(() => {
-        setPosition(p => {
-          if (p >= selected.durationSec) {
-            setPlaying(false);
-            return selected.durationSec;
-          }
-          return p + 0.5;
-        });
-      }, 500);
-    } else if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
-    return () => clearInterval(intervalRef.current);
-  }, [playing, selected.durationSec]);
-
-  const fmt = (s) => `${Math.floor(s/60)}:${(Math.floor(s)%60).toString().padStart(2,'0')}`;
-
-  // Generate fake waveform
-  const wave = Array.from({ length: 80 }, (_, i) =>
-    0.2 + 0.6 * Math.abs(Math.sin(i * 0.5 + selected.id.charCodeAt(4))) + 0.2 * Math.random()
-  );
-
-  // Show transcript progressively as audio plays
-  const transcriptChars = Math.floor(selected.transcript.length * (position / selected.durationSec));
-  const displayTranscript = selected.transcript.slice(0, transcriptChars);
-
-  const select = (id) => {
-    setSelectedId(id);
-    setPosition(0);
-    setPlaying(false);
+  var play=function(){
+    if(progress>=DURATION) setProgress(0);
+    setPlaying(true);
+    ref.current=setInterval(function(){
+      setProgress(function(p){
+        if(p>=DURATION){clearInterval(ref.current);setPlaying(false);return DURATION;}
+        return p+1;
+      });
+    },100);
   };
+  var pause=function(){clearInterval(ref.current);setPlaying(false);};
+  React.useEffect(function(){return function(){clearInterval(ref.current);};}, []);
+
+  var fmt=function(s){return Math.floor(s/60)+':'+(s%60<10?'0':'')+(s%60);};
+  var pct=(progress/DURATION)*100;
 
   return (
-    <div style={voiceStyles.app}>
-      <div style={voiceStyles.list} className="scroll">
-        <div style={voiceStyles.listHead}>
-          <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>Tous les enregistrements</div>
-          <div style={{ fontSize: 11, color: 'var(--ink-faint)', marginTop: 2 }}>{memos.length} mémos · Camille Ott</div>
-        </div>
-        {memos.map(m => (
-          <div
-            key={m.id}
-            onClick={() => select(m.id)}
-            style={{ ...voiceStyles.row, ...(selectedId === m.id ? voiceStyles.rowActive : {}) }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink)' }}>{m.label}</div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
-              <span style={{ fontSize: 11, color: 'var(--ink-faint)' }}>{m.date}</span>
-              <span style={{ fontSize: 11, color: 'var(--ink-faint)', fontFamily: 'var(--font-mono)' }}>{m.duration}</span>
-            </div>
-          </div>
-        ))}
+    <div style={{height:'100%',display:'flex',flexDirection:'column',background:'#1a1d21',fontFamily:'var(--font-sans)'}}>
+      <div style={{padding:'16px 20px',borderBottom:'1px solid rgba(255,255,255,0.06)',flexShrink:0}}>
+        <div style={{fontFamily:'var(--font-mono)',fontSize:10,letterSpacing:'.2em',textTransform:'uppercase',color:'#0a7a6e',marginBottom:4}}>Mémos vocaux</div>
+        <div style={{fontSize:16,fontWeight:600,color:'white'}}>1 message vocal reçu</div>
       </div>
-
-      <div style={voiceStyles.player}>
-        <div style={voiceStyles.playerInfo}>
-          <div style={{ fontSize: 11, color: 'var(--ink-faint)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>Camille Ott · Resp. partenariats B2B</div>
-          <h1 style={{ fontSize: 22, fontWeight: 600, color: 'var(--ink)', marginBottom: 4 }}>{selected.label}</h1>
-          <div style={{ fontSize: 12, color: 'var(--ink-mute)' }}>Enregistré le {selected.date} · entretien interne · consultante RH</div>
-        </div>
-
-        <div style={voiceStyles.waveBox}>
-          <div style={voiceStyles.wave}>
-            {wave.map((h, i) => {
-              const reached = (i / wave.length) <= (position / selected.durationSec);
-              return (
-                <div
-                  key={i}
-                  style={{
-                    flex: 1,
-                    height: `${h * 100}%`,
-                    background: reached ? '#c4420f' : 'rgba(20,24,36,0.25)',
-                    minHeight: 2, borderRadius: 1
-                  }}
-                />
-              );
-            })}
+      <div style={{padding:'12px 16px',borderBottom:'1px solid rgba(255,255,255,0.06)',flexShrink:0}}>
+        <div style={{padding:'10px 14px',background:'rgba(10,122,110,0.1)',borderRadius:10,border:'1px solid rgba(10,122,110,0.2)',display:'flex',alignItems:'center',gap:12}}>
+          <div style={{width:34,height:34,borderRadius:7,background:'#0a7a6e',display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:700,color:'white',flexShrink:0}}>CO</div>
+          <div>
+            <div style={{fontSize:13,fontWeight:600,color:'white'}}>Camille Ott</div>
+            <div style={{fontSize:11,color:'rgba(255,255,255,0.45)',fontFamily:'var(--font-mono)'}}>Lun. 1er sept · 11h22 · 2:14</div>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-mute)' }}>
-            <span>{fmt(position)}</span>
-            <span>−{fmt(Math.max(0, selected.durationSec - position))}</span>
-          </div>
+          <div style={{marginLeft:'auto',fontSize:11,fontStyle:'italic',color:'#0a7a6e'}}>Les vrais chiffres</div>
         </div>
-
-        <div style={voiceStyles.controls}>
-          <button style={voiceStyles.skipBtn}>⏪ 15</button>
-          <button style={voiceStyles.playBtn} onClick={() => setPlaying(!playing)}>
-            {playing ? '⏸' : '▶'}
+      </div>
+      <div style={{padding:'16px 22px',borderBottom:'1px solid rgba(255,255,255,0.06)',flexShrink:0}}>
+        <div style={{display:'flex',alignItems:'center',gap:2,height:36,marginBottom:12}}>
+          {Array.from({length:60},function(_,i){
+            var h=6+Math.abs(Math.sin(i*.8)*18+Math.sin(i*.3)*8);
+            return <div key={i} style={{width:3,height:h,borderRadius:2,background:(i/60)*100<pct?'#0a7a6e':'rgba(255,255,255,0.15)'}}/>;
+          })}
+        </div>
+        <div style={{height:3,background:'rgba(255,255,255,0.1)',borderRadius:2,overflow:'hidden',marginBottom:4}}>
+          <div style={{height:'100%',width:pct+'%',background:'#0a7a6e',transition:'width 0.1s'}}/>
+        </div>
+        <div style={{display:'flex',justifyContent:'space-between',fontSize:10,fontFamily:'var(--font-mono)',color:'rgba(255,255,255,0.35)',marginBottom:14}}>
+          <span>{fmt(progress)}</span><span>{fmt(DURATION)}</span>
+        </div>
+        <div style={{display:'flex',justifyContent:'center'}}>
+          <button onClick={playing?pause:play} style={{width:48,height:48,borderRadius:'50%',background:'#0a7a6e',border:'none',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 4px 16px rgba(10,122,110,0.4)'}}>
+            {playing
+              ?<svg width="16" height="16" viewBox="0 0 24 24" fill="white"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+              :<svg width="16" height="16" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            }
           </button>
-          <button style={voiceStyles.skipBtn}>15 ⏩</button>
         </div>
-
-        <div style={voiceStyles.transcriptBox}>
-          <div style={{ fontSize: 10, color: 'var(--ink-faint)', textTransform: 'uppercase', letterSpacing: '0.12em', fontWeight: 600, marginBottom: 8 }}>
-            Transcription {playing ? '· en direct' : (position > 0 ? '· lue' : '')}
-          </div>
-          {position === 0 && !playing ? (
-            <div style={{ fontSize: 13, color: 'var(--ink-faint)', fontStyle: 'italic', textAlign: 'center', padding: '20px 0' }}>
-              ▶ Appuie sur lecture pour entendre l'entretien.<br/>
-              <span style={{ fontSize: 11 }}>(la transcription apparaîtra au fil de l'écoute)</span>
-            </div>
-          ) : (
-            <div style={voiceStyles.transcriptText}>
-              «&nbsp;{displayTranscript}{playing && '▌'}{position >= selected.durationSec && '&nbsp;»'}
-            </div>
-          )}
+      </div>
+      <div style={{flex:1,overflowY:'auto',padding:'14px 18px'}}>
+        <div style={{background:'rgba(255,255,255,0.04)',borderRadius:10,padding:'14px 16px',border:'1px solid rgba(255,255,255,0.08)'}}>
+          <div style={{fontFamily:'var(--font-mono)',fontSize:9,letterSpacing:'.15em',textTransform:'uppercase',color:'#0a7a6e',marginBottom:10}}>Transcription automatique</div>
+          <pre style={{fontFamily:'var(--font-sans)',fontSize:12,color:'rgba(255,255,255,0.75)',lineHeight:1.8,whiteSpace:'pre-wrap',margin:0}}>{transcription}</pre>
         </div>
       </div>
     </div>
   );
 }
-
-const voiceStyles = {
-  app: { display: 'flex', height: '100%', background: '#fff', overflow: 'hidden' },
-  list: {
-    width: 220, flexShrink: 0,
-    background: 'rgba(244,242,238,0.6)',
-    borderRight: '1px solid var(--rule)',
-    overflowY: 'auto'
-  },
-  listHead: { padding: '14px 16px', borderBottom: '1px solid var(--rule)' },
-  row: { padding: '12px 16px', borderBottom: '1px solid var(--rule)', cursor: 'pointer' },
-  rowActive: { background: 'rgba(196,66,15,0.12)' },
-  player: { flex: 1, padding: '28px 32px', display: 'flex', flexDirection: 'column', overflow: 'hidden' },
-  playerInfo: { marginBottom: 24 },
-  waveBox: { marginBottom: 18 },
-  wave: { display: 'flex', alignItems: 'center', gap: 1.5, height: 70, padding: '0 4px' },
-  controls: { display: 'flex', justifyContent: 'center', gap: 24, alignItems: 'center', marginBottom: 24 },
-  playBtn: {
-    width: 56, height: 56, borderRadius: '50%',
-    background: '#1a2436', color: 'white',
-    border: 'none', fontSize: 18, cursor: 'pointer',
-    display: 'flex', alignItems: 'center', justifyContent: 'center'
-  },
-  skipBtn: { background: 'transparent', border: 'none', color: 'var(--ink-soft)', fontSize: 13, cursor: 'pointer', fontFamily: 'var(--font-mono)' },
-  transcriptBox: {
-    flex: 1,
-    background: '#f4f2ee',
-    borderRadius: 8,
-    padding: '16px 20px',
-    overflow: 'auto'
-  },
-  transcriptText: {
-    fontFamily: 'var(--font-display)',
-    fontSize: 14,
-    lineHeight: 1.7,
-    color: 'var(--ink)',
-    fontStyle: 'italic'
-  }
-};
-
-window.LUMIO_APPS = window.LUMIO_APPS || {};
-window.LUMIO_APPS.voice = VoiceApp;
+window.LUMIO_APPS=window.LUMIO_APPS||{};
+window.LUMIO_APPS.voice=VoiceApp;

@@ -8,103 +8,119 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,300..700;1,300..700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root {
-  --font-display:'Newsreader',Georgia,serif;
-  --font-sans:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
-  --font-mono:'IBM Plex Mono','SF Mono',Menlo,monospace;
-  --ink:#141824; --ink-soft:#2a3142; --ink-mute:#5b6473; --ink-faint:#9aa0ae;
-  --rule:rgba(20,24,36,0.10); --accent:#0a7a6e;
-}
+:root{--font-display:'Newsreader',Georgia,serif;--font-sans:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;--font-mono:'IBM Plex Mono','SF Mono',Menlo,monospace;--ink:#141824;--ink-soft:#2a3142;--ink-mute:#5b6473;--ink-faint:#9aa0ae;--rule:rgba(20,24,36,0.10);--accent:#0a7a6e}
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;height:100%;overflow:hidden}
 body{font-family:var(--font-sans);color:var(--ink);background:#1a2436;-webkit-font-smoothing:antialiased}
 button,input,textarea{font-family:inherit}
-*::-webkit-scrollbar{width:8px;height:8px}
-*::-webkit-scrollbar-track{background:transparent}
-*::-webkit-scrollbar-thumb{background:rgba(20,24,36,0.18);border-radius:4px;border:2px solid transparent;background-clip:padding-box}
+*::-webkit-scrollbar{width:8px;height:8px}*::-webkit-scrollbar-track{background:transparent}*::-webkit-scrollbar-thumb{background:rgba(20,24,36,0.18);border-radius:4px;border:2px solid transparent;background-clip:padding-box}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes typedot{0%,60%,100%{opacity:.2}30%{opacity:1}}
 @keyframes spin{to{transform:rotate(360deg)}}
-@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
 @keyframes slideInNotif{from{opacity:0;transform:translateY(-10px) scale(.96)}to{opacity:1;transform:none}}
 .placeholder-dark::placeholder{color:rgba(255,255,255,0.40)!important}
-#api-err{display:none;position:fixed;top:0;left:0;right:0;z-index:99999;background:#c4420f;color:white;padding:8px 20px;font-size:12px;font-family:var(--font-mono);text-align:center}
-#splash{position:fixed;inset:0;background:#0B2B2D;display:flex;align-items:center;justify-content:center;z-index:99990}
-#splash span{font-family:var(--font-mono);font-size:12px;color:rgba(255,255,255,0.3);letter-spacing:0.15em}
+#splash{position:fixed;inset:0;background:#0B2B2D;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:99990;transition:opacity 0.4s}
+#splash-bar-wrap{width:240px;height:3px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden}
+#splash-bar{height:100%;width:0;background:#0a7a6e;border-radius:2px;transition:width 0.25s}
+#splash-file{font-family:var(--font-mono);font-size:10px;color:rgba(255,255,255,0.2);letter-spacing:.1em;height:14px}
+#err-screen{display:none;position:fixed;inset:0;background:#1a0808;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:99995;padding:40px}
+#err-screen h2{color:#ff6b6b;font-family:var(--font-mono);font-size:15px;letter-spacing:.08em;margin:0}
+#err-screen pre{color:rgba(255,120,120,0.9);font-family:var(--font-mono);font-size:11px;max-width:580px;overflow:auto;background:rgba(255,255,255,0.04);padding:14px;border-radius:8px;max-height:260px;white-space:pre-wrap}
+#err-screen button{padding:9px 22px;background:#c4420f;border:none;color:white;border-radius:8px;cursor:pointer;font-size:13px;font-family:inherit}
 </style>
 </head>
 <body>
-
-<div id="api-err">
-  ⚠ Connexion IA indisponible
-  <button onclick="document.getElementById('api-err').style.display='none'" style="margin-left:12px;background:rgba(255,255,255,0.25);border:none;color:white;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:11px">✕</button>
+<div id="splash">
+  <div style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:300;color:rgba(255,255,255,0.45);letter-spacing:.06em">Lumio Health</div>
+  <div id="splash-bar-wrap"><div id="splash-bar"></div></div>
+  <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(255,255,255,0.25);letter-spacing:.15em">CHARGEMENT</div>
+  <div id="splash-file"></div>
 </div>
-<div id="splash"><span>CHARGEMENT…</span></div>
+<div id="err-screen">
+  <h2>ERREUR DE CHARGEMENT</h2>
+  <pre id="err-detail"></pre>
+  <button onclick="location.reload()">Recharger la page</button>
+</div>
 <div id="root"></div>
 
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin></script>
-<script src="data.js"></script>
-
+<script src="data.js?v=3"></script>
 <script>
-// Proxy API Anthropic → /api/chat
 (function(){
+  'use strict';
+
+  // Proxy Anthropic → /api/chat
   var _f = window.fetch.bind(window);
-  window.fetch = function(url,opts){
+  window.fetch = function(url, opts){
     opts = opts||{};
     if(typeof url==='string' && url.includes('api.anthropic.com')){
-      return _f('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:opts.body})
-        .then(function(r){if(!r.ok)document.getElementById('api-err').style.display='block';return r;})
-        .catch(function(e){document.getElementById('api-err').style.display='block';throw e;});
+      return _f('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:opts.body});
     }
-    return _f(url,opts);
+    return _f(url, opts);
   };
-})();
 
-window.LUMIO_APPS = {};
-
-// Chargement séquentiel — chaque fichier attend le précédent
-var FILES = [
-  'icons.jsx',
-  'app-mail.jsx',
-  'app-browser.jsx',
-  'app-pdf.jsx',
-  'app-voice.jsx',
-  'app-notes.jsx',
-  'app-slack.jsx',
-  'app-extras.jsx',
-  'app-livrable.jsx',
-  'app-assistant.jsx',
-  'app-portfolio.jsx',
-  'desktop.jsx',
-  'main.jsx'
-];
-
-function loadNext(i) {
-  if (i >= FILES.length) {
-    document.getElementById('splash').style.display = 'none';
-    return;
+  function showErr(title, detail){
+    document.getElementById('splash').style.display='none';
+    var e=document.getElementById('err-screen');
+    e.style.display='flex';
+    document.getElementById('err-detail').textContent=title+'\n\n'+(detail||'');
+    console.error('[LUMIO]',title,detail);
   }
-  fetch(FILES[i] + '?v=' + Date.now())
-    .then(function(r){ return r.text(); })
-    .then(function(src){
-      var compiled = Babel.transform(src, {presets:['react']}).code;
-      // Exécuter dans le scope global via script tag — préserve window.*
-      var s = document.createElement('script');
-      s.textContent = compiled;
-      document.head.appendChild(s);
-      loadNext(i + 1);
-    })
-    .catch(function(e){
-      console.error('Erreur chargement', FILES[i], e);
-      loadNext(i + 1);
-    });
-}
 
-loadNext(0);
+  window.LUMIO_APPS={};
+
+  var FILES=[
+    'icons.jsx','app-mail.jsx','app-browser.jsx','app-pdf.jsx',
+    'app-voice.jsx','app-notes.jsx','app-slack.jsx','app-extras.jsx',
+    'app-livrable.jsx','app-assistant.jsx','app-portfolio.jsx',
+    'desktop.jsx','main.jsx'
+  ];
+
+  function setBar(i){
+    document.getElementById('splash-bar').style.width=Math.round(i/FILES.length*100)+'%';
+    document.getElementById('splash-file').textContent=i<FILES.length?FILES[i]:'';
+  }
+
+  function loadNext(i){
+    if(i>=FILES.length){
+      setBar(i);
+      var sp=document.getElementById('splash');
+      sp.style.opacity='0';
+      setTimeout(function(){sp.style.display='none';},400);
+      return;
+    }
+    setBar(i);
+    var file=FILES[i];
+    fetch(file+'?v=3')
+      .then(function(r){
+        if(!r.ok) throw new Error('HTTP '+r.status);
+        return r.text();
+      })
+      .then(function(src){
+        var compiled;
+        try{ compiled=Babel.transform(src,{presets:['react']}).code; }
+        catch(e){ showErr('Babel error: '+file, e.message); return; }
+        // IIFE — isole les const/let, window.* reste global
+        var wrapped='(function(React,ReactDOM){"use strict";\n'+compiled+'\n})(window.React,window.ReactDOM);';
+        try{
+          var s=document.createElement('script');
+          s.textContent=wrapped;
+          document.head.appendChild(s);
+        }catch(e){
+          console.error('[LUMIO] exec error:',file,e);
+          showErr('Exec error: '+file, e.message);
+          return;
+        }
+        loadNext(i+1);
+      })
+      .catch(function(e){ showErr('Fetch error: '+file, e.message); });
+  }
+
+  loadNext(0);
+})();
 </script>
-
 </body>
 </html>
