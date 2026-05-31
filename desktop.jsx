@@ -97,7 +97,16 @@ function Win({ win, onFocus, onClose, onMinimize, onMove, onResize }) {
     document.addEventListener('mouseup', up);
   };
   const meta = APP_META[win.app];
-  const AppComp = (window.LUMIO_APPS || {})[win.app];
+  const [AppComp, setAppComp] = React.useState(() => (window.LUMIO_APPS || {})[win.app]);
+  // Polling : Babel compile les JSX en asynchrone — retry jusqu'à ce que l'app soit dispo
+  React.useEffect(() => {
+    if (AppComp) return;
+    const id = setInterval(() => {
+      const comp = (window.LUMIO_APPS || {})[win.app];
+      if (comp) { setAppComp(() => comp); clearInterval(id); }
+    }, 100);
+    return () => clearInterval(id);
+  }, [win.app]);
   const style = win.maximized
     ? { left: 0, top: 28, width: '100%', height: 'calc(100% - 28px - 76px)' }
     : { left: win.x, top: win.y, width: win.w, height: win.h };
