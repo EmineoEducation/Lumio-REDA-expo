@@ -91,7 +91,7 @@ function IntroSlides({name,onDone}){
     {icon:'🏢',titre:'Lumio Health',corps:'Medtech parisienne fondée en 2018. Spécialiste des wearables de mesure du stress en entreprise. 180 clients B2B actifs en France.'},
     {icon:'📍',titre:'Ton périmètre — Île-de-France',corps:'47 comptes B2B actifs. CA récurrent 1,24 M€. Périmètre sans pilote depuis 6 mois. 3 comptes stratégiques en danger silencieux que le CRM ne révèle pas.'},
     {icon:'⚡',titre:'La tension principale',corps:"Moodwork vient d'obtenir la certification MDR et signe des comptes en IDF. Lumio attend la sienne (Q2 2027). Budget prospection gelé à 8 000 € pour H2."},
-    {icon:'🎯',titre:'Ta mission',corps:"Théo Marczak te demande un plan d'action commercial pour le CODIR du vendredi 19 septembre. 10 jours fictifs = 3h30 réelles. Commence par les emails."},
+    {icon:'🎯',titre:'Ta mission',corps:"Théo Marczak te demande un plan d'action commercial pour le CODIR du vendredi 19 septembre. 18 jours fictifs, condensés pour la démo. Commence par les emails."},
   ];
   var s=slides[i];
   return (
@@ -120,11 +120,11 @@ function IntroSlides({name,onDone}){
 function Brief({name,onStart,onShowIntro}){
   var [ok,setOk]=React.useState(false);
   var actes=[
-    {n:'1',label:'Premier jour',dur:'20 min',color:'#5c6878'},
-    {n:'2',label:'État terrain',dur:'30 min',color:'#1b4f8a'},
-    {n:'3',label:'Hypothèse',dur:'45 min',color:'#0a7a6e'},
-    {n:'4',label:'Production',dur:'1h20',color:'#c4420f',bold:true},
-    {n:'5',label:'Portfolio',dur:'35 min',color:'#0a7a6e'},
+    {n:'1',label:'Premier jour',dur:'Étape 1',color:'#5c6878'},
+    {n:'2',label:'État terrain',dur:'Étape 2',color:'#1b4f8a'},
+    {n:'3',label:'Hypothèse',dur:'Étape 3',color:'#0a7a6e'},
+    {n:'4',label:'Production',dur:'Étape 4',color:'#c4420f',bold:true},
+    {n:'5',label:'Portfolio',dur:'Étape 5',color:'#0a7a6e'},
   ];
   var prenom=(name||'').split(' ')[0]||'';
   return (
@@ -134,7 +134,7 @@ function Brief({name,onStart,onShowIntro}){
         <h1 style={{fontFamily:'var(--font-display)',fontSize:26,fontWeight:600,color:'var(--ink)',marginBottom:12}}>Bienvenue, {prenom}.</h1>
         <p style={{fontSize:13,lineHeight:1.7,color:'var(--ink-soft)',marginBottom:14}}>Tu es <strong>{name}</strong>, Responsable commercial IDF chez Lumio Health. Théo Marczak te demande un <strong>plan d'action commercial</strong> pour le CODIR du vendredi 19 septembre. <em>Budget : 8 000 €. Les vrais chiffres ne sont pas dans le CRM.</em></p>
         <div style={{background:'#0B2B2D',borderRadius:10,padding:'14px 18px',marginBottom:14}}>
-          <div style={{fontFamily:'var(--font-mono)',fontSize:22,fontWeight:700,color:'white',marginBottom:10}}>3h30 <span style={{fontSize:13,fontWeight:400,opacity:.6}}>= 18 jours fictifs</span></div>
+          <div style={{fontFamily:'var(--font-mono)',fontSize:22,fontWeight:700,color:'white',marginBottom:10}}>Démo ~12 min <span style={{fontSize:13,fontWeight:400,opacity:.6}}>= 18 jours fictifs</span></div>
           <div style={{display:'flex',gap:5,flexWrap:'wrap'}}>
             {actes.map(function(a){return (
               <div key={a.n} style={{flex:'1 1 70px',background:a.bold?a.color:'rgba(255,255,255,0.07)',border:'1px solid '+(a.bold?'transparent':'rgba(255,255,255,0.1)'),borderRadius:7,padding:'7px 9px'}}>

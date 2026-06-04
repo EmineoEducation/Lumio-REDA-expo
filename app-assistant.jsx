@@ -123,7 +123,7 @@ function AssistantApp() {
           <div style={{ fontSize: 13, fontWeight: 700, color: 'white' }}>Jefferson</div>
           <div style={{ fontSize: 10, color: '#5DE298', fontFamily: 'var(--font-mono)' }}>Guide procédural · BC01 REDA</div>
         </div>
-        <div style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: 10, color: 'rgba(255,255,255,0.5)' }}>{elapsedMin}min / 210</div>
+        <div style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: 10, color: 'rgba(255,255,255,0.5)' }}>Guide PAC</div>
       </div>
       <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
         {messages.map((m, i) => (

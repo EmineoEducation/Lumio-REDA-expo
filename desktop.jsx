@@ -12,6 +12,7 @@ var APP_META = {
   notes:     { title:'Notes',                  w:860,  h:620 },
   slack:     { title:'Slack — Lumio Health',   w:960,  h:620 },
   finder:    { title:'Finder',                 w:800,  h:520 },
+  calendar:  { title:'Calendrier — Sept. 2026', w:760,  h:560 },
   trash:     { title:'Corbeille',              w:480,  h:360 },
   livrable:  { title:'Livrable — BC01 REDA',   w:900,  h:600 },
   jefferson: { title:'Jefferson · Guide PAC',  w:460,  h:540 },
@@ -146,18 +147,16 @@ function MenuBar({activeApp,onLogout,timeLabel}){
 // ── PAC Timeline ─────────────────────────────────────────────
 function Timeline({acteIdx,elapsed}){
   var a=ACTES[acteIdx]||ACTES[0];
-  var remaining=Math.max(0,TOTAL_MIN-elapsed);
   return (
     <div style={{position:'fixed',bottom:80,left:'50%',transform:'translateX(-50%)',zIndex:8000,pointerEvents:'none'}}>
       <div style={{background:'rgba(20,24,36,0.72)',backdropFilter:'blur(16px)',borderRadius:12,padding:'8px 14px',display:'flex',alignItems:'center',gap:10,border:'1px solid rgba(255,255,255,0.08)'}}>
         <div style={{display:'flex',gap:3}}>
           {ACTES.map(function(ac,i){
-            var w=ac.dur*1.4;
-            var bg=elapsed>=_acteStart[i]+ac.dur?'rgba(255,255,255,0.3)':elapsed>=_acteStart[i]?ac.color:'rgba(255,255,255,0.1)';
-            return <div key={i} style={{width:w,height:6,borderRadius:3,background:bg}}/>;
+            var bg=i<acteIdx?'rgba(255,255,255,0.3)':i===acteIdx?ac.color:'rgba(255,255,255,0.1)';
+            return <div key={i} style={{width:36,height:6,borderRadius:3,background:bg}}/>;
           })}
         </div>
-        <span style={{fontFamily:'var(--font-mono)',fontSize:10,color:'rgba(255,255,255,0.7)',whiteSpace:'nowrap'}}>Acte {a.n} · {remaining}min</span>
+        <span style={{fontFamily:'var(--font-mono)',fontSize:10,color:'rgba(255,255,255,0.7)',whiteSpace:'nowrap'}}>Acte {a.n} · {a.label}</span>
       </div>
     </div>
   );
@@ -174,7 +173,7 @@ function DemoNav({acteIdx,onPrev,onNext,flash}){
         <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:6}}>
           <div style={{width:6,height:6,borderRadius:'50%',background:a.color,flexShrink:0}}/>
           <span style={{fontFamily:'var(--font-mono)',fontSize:10,color:a.color,letterSpacing:'.1em',textTransform:'uppercase'}}>Acte {a.n}</span>
-          <span style={{fontFamily:'var(--font-mono)',fontSize:10,color:'rgba(255,255,255,0.3)'}}>{a.dur} min</span>
+          <span style={{fontFamily:'var(--font-mono)',fontSize:10,color:'rgba(255,255,255,0.3)'}}>{a.n}/{ACTES.length}</span>
         </div>
         <div style={{fontSize:12,fontWeight:600,color:'white',marginBottom:4}}>{a.label}</div>
         <div style={{fontSize:11,color:'rgba(255,255,255,0.5)',lineHeight:1.5,marginBottom:8}}>{a.desc}</div>
@@ -202,6 +201,7 @@ function Dock({openApp,wins,livrableOk}){
     {app:'voice',icon:'🎙',label:'Mémos'},
     {app:'notes',icon:'📝',label:'Notes'},
     {app:'finder',icon:'📁',label:'Finder'},
+    {app:'calendar',icon:'📅',label:'Calendrier'},
     {app:'jefferson',icon:'🐰',label:'Jefferson'},
     null,
     {app:'livrable',icon:'✅',label:'Livrable',locked:!livrableOk},
@@ -305,7 +305,6 @@ function Desktop({onLogout,studentName,timerStart}){
     setFlash(true);
     setTimeout(function(){setFlash(false);},1200);
     setWins([]);
-    var app=ACTES[idx].apps||[ACTES[idx].label.toLowerCase()];
     // Ouvrir la bonne app selon l'acte
     var appMap={1:'mail',2:'voice',3:'slack',4:'livrable',5:'browser'};
     setTimeout(function(){openApp(appMap[idx+1]||'mail');},120);
@@ -320,13 +319,50 @@ function Desktop({onLogout,studentName,timerStart}){
     return function(){window.__onSlackExchange=null;};
   },[]);
 
+  // ── Wiring global : ouverture d'apps depuis n'importe quel composant ──
+  // Finder (useWindows), bouton portfolio (__openPortfolio), notifications, etc.
+  React.useEffect(function(){
+    // Finder appelle window.useWindows().open(appId, props)
+    window.useWindows = function(){ return { open: openApp }; };
+    // Ouverture directe générique
+    window.__openApp = openApp;
+    // Bouton "Voir mon portfolio" : ouvre Safari sur l'onglet portfolio,
+    // que le navigateur soit déjà ouvert ou non.
+    window.__openPortfolio = function(){
+      openApp('browser', { openPortfolio: true });
+    };
+    return function(){
+      window.useWindows = null;
+      window.__openApp = null;
+      window.__openPortfolio = null;
+    };
+  },[wins,zTop]);
+
+  // ── Horloge fictive globale (Calendrier, etc.) ──
+  React.useEffect(function(){
+    window.__getFictifTime = function(){
+      var start = window.LUMIO_TIMER_START || Date.now();
+      var off   = window.__DEMO_ELAPSED_OFFSET || 0;
+      var elapsedMin = Math.min(Math.floor((Date.now()-start)/60000 + off), TOTAL_MIN);
+      var RATIO = 18*24*60/TOTAL_MIN;
+      var totalFictifMin = 8*60+7 + elapsedMin*RATIO;
+      var day = Math.min(1 + Math.floor(totalFictifMin/(24*60)), 19);
+      return { day: day, elapsedMin: elapsedMin };
+    };
+    return function(){ window.__getFictifTime = null; };
+  },[]);
+
   function openApp(appId,props){
     if(!appId) return;
     props=props||{};
     var ex=wins.find(function(w){return w.app===appId;});
     if(ex){
-      if(ex.min) setWins(function(ws){return ws.map(function(w){return w.id===ex.id?{...w,min:false,focused:true,z:zTop+1}:{...w,focused:false};});});
-      else focusWin(ex.id);
+      var hasProps=Object.keys(props).length>0;
+      setWins(function(ws){return ws.map(function(w){
+        if(w.id===ex.id) return {...w,min:false,focused:true,z:zTop+1,props:hasProps?{...(w.props||{}),...props,_n:Date.now()}:w.props};
+        return {...w,focused:false};
+      });});
+      setZTop(zTop+1);
       return;
     }
     var meta=APP_META[appId];

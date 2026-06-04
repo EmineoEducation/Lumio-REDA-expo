@@ -71,7 +71,7 @@ OÙ EN ÊTES-VOUS ?
 
 Premier lundi. Vous avez les clés du bureau, un accès CRM et un mail de
 Théo qui vous demande un plan d'action complet pour le CODIR de rentrée —
-vendredi 19 septembre. En 10 jours fictifs, dans l'univers Lumio.`
+vendredi 19 septembre. En 18 jours fictifs, dans l'univers Lumio.`
   },
 
   // ─── Email de mission — Théo → étudiant·e ────────────────
