@@ -298,6 +298,36 @@ function Desktop({onLogout,studentName,timerStart}){
     return function(){document.removeEventListener('keydown',handler);};
   },[]);
 
+  // Garantit des données de portfolio même sans soumission (navigation démo)
+  function ensurePortfolioData(){
+    if(window.LUMIO_PORTFOLIO_DATA) return;
+    var cfg=window.PASS_CONFIG||{};
+    var COMPS=cfg.competences||[];
+    var D=window.LUMIO_DATA||{};
+    var answers={}, wcs={}, total=0;
+    COMPS.forEach(function(c){
+      var demo=c.demo||'';
+      var n=demo.trim()?demo.trim().split(/\s+/).length:0;
+      answers[c.code]=demo; wcs[c.code]=n; total+=n;
+    });
+    window.LUMIO_PORTFOLIO_DATA={
+      answers:answers, wordCounts:wcs, globalWords:total,
+      studentName:(D.student&&D.student.name)||'',
+      timestamp:Date.now(),
+      feedback:{
+        competences:COMPS.map(function(c){
+          var n=wcs[c.code]||0, min=c.min||0;
+          return {code:c.code,label:c.label||c.code,
+            niveau:n>=min*1.4?'Acquis':n>=min?"En cours d'acquisition":'À consolider',
+            visible:'Le contenu produit couvre les attendus de '+(c.label||c.code)+' ('+n+' mots).',
+            invisible:'Relecture par l\'accompagnateur à l\'oral pour expliciter les choix.'};
+        }),
+        recit:'J\'ai priorisé les comptes stratégiques en danger avant la prospection, en m\'appuyant sur les vrais chiffres terrain plutôt que sur le CRM.',
+        signature:'Dans cette affaire, j\'ai choisi de sécuriser l\'existant sous contrainte budgétaire avant d\'engager la conquête.'
+      }
+    };
+  }
+
   function jumpTo(idx){
     window.__DEMO_ELAPSED_OFFSET=_acteStart[idx];
     setElapsed(_acteStart[idx]);
@@ -305,12 +335,15 @@ function Desktop({onLogout,studentName,timerStart}){
     setFlash(true);
     setTimeout(function(){setFlash(false);},1200);
     setWins([]);
-    // Ouvrir la bonne app selon l'acte
-    var appMap={1:'mail',2:'voice',3:'slack',4:'livrable',5:'browser'};
-    setTimeout(function(){openApp(appMap[idx+1]||'mail');},120);
-    if(idx===4&&window.LUMIO_PORTFOLIO_DATA){
-      setTimeout(function(){openApp('browser',{openPortfolio:true});},300);
+    // Acte 5 (idx 4) : portfolio garanti, ouvert directement dans Safari
+    if(idx===4){
+      ensurePortfolioData();
+      setTimeout(function(){openApp('browser',{openPortfolio:true});},120);
+      return;
     }
+    // Autres actes : ouvrir l'app principale
+    var appMap={1:'mail',2:'voice',3:'slack',4:'livrable'};
+    setTimeout(function(){openApp(appMap[idx+1]||'mail');},120);
   }
 
   // Hooks inter-apps
